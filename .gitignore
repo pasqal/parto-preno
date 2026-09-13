@@ -1,0 +1,8 @@
+# Données persistantes (non versionnées)
+data/*.json
+data/lists/
+data/index.html
+
+# Garder la structure du dossier et la protection Apache
+!data/.gitkeep
+!data/.htaccess
