@@ -25,13 +25,24 @@ function check($name, $cond) {
     else { echo "  FAIL $name\n"; $fail++; }
 }
 
-// === Tests du parseur ===
-$md = "# Sortie vélo\n\n1. Pilote\n2. Mécanicien\n3. Ravitaillement\n\n# Repas\n\n1. Apéritif\n2. Plat";
+// === Tests du parseur (nouveau format : # = nom, paragraphe = description, ## = groupe, - = point) ===
+$md = "# Sortie vélo\n\nLa grande sortie annuelle du club.\n\n## Encadrement\n\n- Pilote\n- Mécanicien\n\n## Logistique\n\n- Ravitaillement\n\n# Repas\n\nLe repas de fin de saison.\n\n- Apéritif\n- Plat";
 $r = MarkdownListParser::parse($md);
 check("parseur: 2 listes", count($r) === 2);
 check("parseur: liste1 titre 'Sortie vélo'", $r[0]['title'] === 'Sortie vélo');
-check("parseur: liste1 3 slots", count($r[0]['slots']) === 3 && $r[0]['slots'][0] === 'Pilote');
+check("parseur: liste1 description", $r[0]['description'] === 'La grande sortie annuelle du club.');
+check("parseur: liste1 2 groupes", count($r[0]['groups']) === 2);
+check("parseur: groupe1 titre 'Encadrement'", $r[0]['groups'][0]['title'] === 'Encadrement');
+check("parseur: groupe1 2 points", $r[0]['groups'][0]['slots'] === ['Pilote', 'Mécanicien']);
+check("parseur: groupe2 titre 'Logistique'", $r[0]['groups'][1]['title'] === 'Logistique');
+check("parseur: liste1 slots plats vides", $r[0]['slots'] === []);
 check("parseur: liste2 titre 'Repas'", $r[1]['title'] === 'Repas');
+check("parseur: liste2 description", $r[1]['description'] === 'Le repas de fin de saison.');
+check("parseur: liste2 sans groupe, 2 points", $r[1]['groups'] === [] && $r[1]['slots'] === ['Apéritif', 'Plat']);
+
+// Compatibilité ancien format : listes ordonnées acceptées
+$rOld = MarkdownListParser::parse("# T\n\n1. a\n2. b");
+check("parseur: listes ordonnées acceptées", $rOld[0]['slots'] === ['a', 'b']);
 
 // Liste à puces acceptée
 $r2 = MarkdownListParser::parse("# T\n\n- a\n- b");
@@ -40,6 +51,10 @@ check("parseur: puces acceptées", $r2[0]['slots'] === ['a', 'b']);
 // Sans titre
 $r3 = MarkdownListParser::parse("1. x\n2. y");
 check("parseur: sans titre -> 'Liste sans titre'", $r3[0]['title'] === 'Liste sans titre' && $r3[0]['slots'] === ['x', 'y']);
+
+// Description sur plusieurs lignes
+$r4 = MarkdownListParser::parse("# T\n\nLigne une.\nLigne deux.\n\n- a");
+check("parseur: description multiligne", $r4[0]['description'] === 'Ligne une. Ligne deux.');
 
 // === Setup ===
 Setup::ensureDirs();
@@ -69,16 +84,34 @@ check("Auth::isAdmin true", Auth::isAdmin() === true);
 // Reproduisons la logique: parse + saveList.
 $parsed = MarkdownListParser::parse($md);
 foreach ($parsed as $pl) {
+    $slots = $pl['slots'];
+    if (empty($slots) && !empty($pl['groups'])) {
+        foreach ($pl['groups'] as $g) {
+            foreach ($g['slots'] as $s) $slots[] = $s;
+        }
+    }
     Storage::saveList([
-        'id' => Auth::genId(), 'title' => $pl['title'], 'slots' => $pl['slots'],
+        'id' => Auth::genId(), 'title' => $pl['title'],
+        'description' => $pl['description'] ?? '', 'groups' => $pl['groups'] ?? [],
+        'slots' => $slots,
         'password' => '', 'one_per_user' => true, 'owner_id' => $admin['id'],
         'signups' => [], 'created' => date('c'),
     ]);
 }
 $lists = Storage::listAll();
 check("2 listes stockées", count($lists) === 2);
-$first = $lists[0];
+$first = null; $second = null;
+foreach ($lists as $l) {
+    if ($l['title'] === 'Sortie vélo') $first = $l;
+    if ($l['title'] === 'Repas') $second = $l;
+}
+check("liste 'Sortie vélo' trouvée", $first !== null);
+check("liste 'Repas' trouvée", $second !== null);
 check("liste1 one_per_user=true", !empty($first['one_per_user']));
+check("liste1 description stockée", $first['description'] === 'La grande sortie annuelle du club.');
+check("liste1 2 groupes stockés", count($first['groups']) === 2);
+check("liste1 slots fusionnés (3)", $first['slots'] === ['Pilote', 'Mécanicien', 'Ravitaillement']);
+check("liste2 sans groupe, slots plats", $second['groups'] === [] && $second['slots'] === ['Apéritif', 'Plat']);
 
 // === Inscription (logique App::handleSignup sans redirection) ===
 // Simuler $_POST et appeler la logique directement en répliquant.

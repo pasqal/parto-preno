@@ -25,6 +25,8 @@ class Mod
                 $list = [
                     'id'           => $id,
                     'title'        => $parsed_list['title'],
+                    'description'  => $parsed_list['description'] ?? '',
+                    'groups'       => $parsed_list['groups'] ?? [],
                     'slots'        => $parsed_list['slots'],
                     'password'     => $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '',
                     'one_per_user' => $onePerUser,
@@ -32,6 +34,13 @@ class Mod
                     'signups'      => [],
                     'created'      => date('c'),
                 ];
+                if (empty($list['slots']) && !empty($list['groups'])) {
+                    foreach ($list['groups'] as $g) {
+                        foreach ($g['slots'] as $s) {
+                            $list['slots'][] = $s;
+                        }
+                    }
+                }
                 Storage::saveList($list);
                 $count++;
             }
@@ -61,11 +70,35 @@ class Mod
             $slots = array_values(array_filter(array_map('trim', $slots), function ($s) {
                 return $s !== '';
             }));
+            $description = trim($_POST['description'] ?? '');
+            $groupsIn = $_POST['groups'] ?? [];
+            $groups = [];
+            if (is_array($groupsIn)) {
+                foreach ($groupsIn as $g) {
+                    $g = array_values(array_filter(array_map('trim', is_array($g) ? $g : []), function ($s) {
+                        return $s !== '';
+                    }));
+                    if (!empty($g)) {
+                        $groups[] = $g;
+                    }
+                }
+            }
             $password = trim($_POST['password'] ?? '');
             $removePassword = !empty($_POST['remove_password']);
             $onePerUser = !empty($_POST['one_per_user']);
             $list['title'] = $title !== '' ? $title : $list['title'];
+            $list['description'] = $description;
             $list['slots'] = $slots;
+            $list['groups'] = $groups;
+            if (empty($slots) && !empty($groups)) {
+                $merged = [];
+                foreach ($groups as $g) {
+                    foreach ($g as $s) {
+                        $merged[] = $s;
+                    }
+                }
+                $list['slots'] = $merged;
+            }
             if ($removePassword) {
                 $list['password'] = '';
             } elseif ($password !== '') {
@@ -73,8 +106,8 @@ class Mod
             }
             $list['one_per_user'] = $onePerUser;
             // Nettoyer les inscriptions dont le slot n'existe plus.
-            $list['signups'] = array_values(array_filter($list['signups'] ?? [], function ($s) use ($slots) {
-                return in_array($s['slot'], $slots, true);
+            $list['signups'] = array_values(array_filter($list['signups'] ?? [], function ($s) use ($list) {
+                return in_array($s['slot'], $list['slots'], true);
             }));
             Storage::saveList($list);
             Session::flash('ok', 'Liste mise à jour.');

@@ -29,19 +29,35 @@ Aucune installation de dépendances n'est requise : PHP 7.4+ (8.x recommandé).
 ## Format d'import Markdown
 
 ```
-# Titre de la liste
+# Nom de la liste
 
-1. Ligne d'inscription 1
-2. Ligne d'inscription 2
-3. Ligne d'inscription 3
+Le paragraphe juste en dessous donne la description de la liste.
+
+## Titre d'un groupe
+
+- Point d'inscription 1
+- Point d'inscription 2
+
+## Autre groupe
+
+- Point d'inscription 3
 
 # Autre liste
 
-1. ...
+Description de l'autre liste.
+
+- Point sans groupe
 ```
 
-- Chaque `#` démarre une nouvelle liste (tableau).
-- Les listes ordonnées (`1.` `2.` ...) deviennent les **lignes** (slots) d'inscription.
+- `#` : le nom de la liste.
+- Le paragraphe juste en dessous : la description de la liste.
+- `##` : le titre d'un groupe.
+- `-` : les points auxquels on peut s'inscrire.
+- Les listes ordonnées (`1.` `2.` ...) restent acceptées en compatibilité.
+
+## Inscription en un clic
+
+Les listes sont affichées directement sur la page d'accueil : il suffit de cliquer sur un point pour s'inscrire, et re-cliquer pour se désinscrire. Les inscrits apparaissent sous chaque point sous forme de bulles de couleurs (la vôtre est mise en évidence).
 
 ## Sécurité
 

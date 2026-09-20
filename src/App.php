@@ -32,6 +32,10 @@ class App
                 if (password_verify($_POST['password'] ?? '', $list['password'])) {
                     Session::set($key, true);
                     $unlocked = true;
+                    if (($_POST['back'] ?? '') === 'home') {
+                        Session::flash('ok', 'Liste déverrouillée.');
+                        Auth::redirect('');
+                    }
                 } else {
                     Session::flash('error', 'Mot de passe incorrect.');
                 }
@@ -79,6 +83,11 @@ class App
         $pseudo = trim($_POST['pseudo'] ?? '');
         if ($pseudo === '') {
             $pseudo = $user['pseudo'] ?? $user['login'];
+        }
+        // Le slot doit exister dans la liste.
+        if (!in_array($slot, $list['slots'] ?? [], true)) {
+            Session::flash('error', 'Ce point d\'inscription n\'existe pas.');
+            Auth::redirect('a=list&id=' . $id);
         }
 
         // Limite : 1 inscription par slot par utilisateur, 1 slot par utilisateur.
@@ -152,18 +161,39 @@ class App
             header('Content-Type: text/markdown; charset=utf-8');
             header('Content-Disposition: attachment; filename="' . $safeName . '.md"');
             echo "# " . $list['title'] . "\n\n";
-            foreach ($list['slots'] as $slotName) {
-                echo "## " . $slotName . "\n\n";
-                $people = $bySlot[$slotName] ?? [];
-                if (empty($people)) {
-                    echo "_(aucun inscrit)_\n\n";
-                } else {
-                    foreach ($people as $p) {
-                        echo "- " . self::displayName($p) . "\n";
+            if (!empty($list['description'])) {
+                echo $list['description'] . "\n\n";
+            }
+            $groups = $list['groups'] ?? [];
+            $groupedSlots = [];
+            foreach ($groups as $g) {
+                $gSlots = $g['slots'] ?? $g;
+                echo "## " . ($g['title'] ?? '') . "\n\n";
+                foreach ($gSlots as $slotName) {
+                    $groupedSlots[] = $slotName;
+                    echo "- " . $slotName;
+                    $people = $bySlot[$slotName] ?? [];
+                    if (!empty($people)) {
+                        $names = array_map([get_class(), 'displayName'], $people);
+                        echo " — " . implode(', ', $names);
                     }
                     echo "\n";
                 }
+                echo "\n";
             }
+            foreach ($list['slots'] as $slotName) {
+                if (in_array($slotName, $groupedSlots, true)) {
+                    continue;
+                }
+                echo "- " . $slotName;
+                $people = $bySlot[$slotName] ?? [];
+                if (!empty($people)) {
+                    $names = array_map([get_class(), 'displayName'], $people);
+                    echo " — " . implode(', ', $names);
+                }
+                echo "\n";
+            }
+            echo "\n";
             exit;
         }
 
@@ -191,5 +221,50 @@ class App
     {
         $pseudo = $p['pseudo'] ?? '';
         return $pseudo !== '' ? $pseudo : ($p['login'] ?? 'Anonyme');
+    }
+
+    // Rend un point d'inscription cliquable : clic = inscription / désinscription.
+    public static function renderSlot($list, $slot, $people, $user)
+    {
+        $myHere = false;
+        foreach ($people as $p) {
+            if (($p['user_id'] ?? '') === ($user['id'] ?? null)) { $myHere = true; break; }
+        }
+        $colors = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5'];
+        $colorIdx = abs(crc32($slot)) % count($colors);
+        $color = $colors[$colorIdx];
+        $classes = 'slot-chip ' . $color . ($myHere ? ' mine' : '');
+        $title = $myHere ? 'Cliquez pour vous désinscrire' : 'Cliquez pour vous inscrire';
+        ob_start();
+        if (Auth::check()): ?>
+          <form method="post" action="index.php?a=signup" class="slot-form">
+            <input type="hidden" name="id" value="<?= htmlspecialchars($list['id']) ?>">
+            <input type="hidden" name="slot" value="<?= htmlspecialchars($slot) ?>">
+            <input type="hidden" name="do" value="<?= $myHere ? 'remove' : 'add' ?>">
+            <button type="submit" class="<?= $classes ?>" title="<?= htmlspecialchars($title) ?>">
+              <span class="slot-name"><?= htmlspecialchars($slot) ?></span>
+              <span class="slot-people">
+                <?php if (empty($people)): ?>
+                  <span class="bubble empty">—</span>
+                <?php else: foreach ($people as $p): ?>
+                  <span class="bubble p<?= abs(crc32(App::displayName($p))) % 6 ?><?= ($p['user_id'] ?? '') === ($user['id'] ?? null) ? ' me' : '' ?>" title="<?= htmlspecialchars(App::displayName($p)) ?>"><?= htmlspecialchars(App::displayName($p)) ?></span>
+                <?php endforeach; endif; ?>
+              </span>
+            </button>
+          </form>
+        <?php else: ?>
+          <div class="<?= $classes ?>" title="Connectez-vous pour vous inscrire">
+            <span class="slot-name"><?= htmlspecialchars($slot) ?></span>
+            <span class="slot-people">
+              <?php if (empty($people)): ?>
+                <span class="bubble empty">—</span>
+              <?php else: foreach ($people as $p): ?>
+                <span class="bubble p<?= abs(crc32(App::displayName($p))) % 6 ?>"><?= htmlspecialchars(App::displayName($p)) ?></span>
+              <?php endforeach; endif; ?>
+            </span>
+          </div>
+        <?php endif;
+        $out = ob_get_clean();
+        return $out;
     }
 }

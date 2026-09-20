@@ -43,13 +43,20 @@ check("home a 'Listes d'inscription'", strpos($h, "Listes d'inscription") !== fa
 
 // Créer une liste + render home + list
 Storage::saveList([
-    'id' => Auth::genId(), 'title' => 'Sortie vélo', 'slots' => ['Pilote', 'Mécanicien'],
+    'id' => Auth::genId(), 'title' => 'Sortie vélo',
+    'description' => 'La grande sortie annuelle du club.',
+    'groups' => [['title' => 'Encadrement', 'slots' => ['Pilote', 'Mécanicien']]],
+    'slots' => ['Pilote', 'Mécanicien'],
     'password' => '', 'one_per_user' => false, 'owner_id' => $admin['id'],
     'signups' => [], 'created' => date('c'),
 ]);
 $lists = Storage::listAll();
 $h = render('home', ['lists' => $lists]);
 check("home avec liste affiche 'Sortie vélo'", strpos($h, 'Sortie vélo') !== false);
+check("home affiche la description", strpos($h, 'La grande sortie annuelle du club.') !== false);
+check("home affiche le groupe 'Encadrement'", strpos($h, 'Encadrement') !== false);
+check("home affiche le point cliquable 'Pilote'", strpos($h, 'Pilote') !== false && strpos($h, 'slot-chip') !== false);
+check("home a un formulaire d'inscription inline (a=signup)", strpos($h, 'a=signup') !== false);
 
 $lid = $lists[0]['id'];
 $list = Storage::listById($lid);
@@ -58,7 +65,26 @@ foreach ($list['signups'] as $s) $bySlot[$s['slot']][] = $s;
 $v = render('list', ['list' => $list, 'user' => Auth::user(), 'unlocked' => true, 'bySlot' => $bySlot]);
 check("vue list rend sans erreur", strpos($v, 'EXCEPTION') === false);
 check("vue list affiche 'Pilote'", strpos($v, 'Pilote') !== false);
-check("vue list affiche bouton S'inscrire", strpos($v, "S'inscrire") !== false);
+check("vue list affiche le titre du groupe", strpos($v, 'Encadrement') !== false);
+check("vue list affiche la description", strpos($v, 'La grande sortie annuelle du club.') !== false);
+
+// Vue home avec un inscrit : bulle de couleur présente
+$list['signups'] = [['user_id' => $admin['id'], 'login' => 'admin', 'pseudo' => 'AdminBob', 'slot' => 'Pilote', 'at' => date('c')]];
+Storage::saveList($list);
+$lists = Storage::listAll();
+$h = render('home', ['lists' => $lists]);
+check("home affiche la bulle de l'inscrit", strpos($h, 'AdminBob') !== false && strpos($h, 'bubble') !== false);
+check("home marque son propre point (mine)", strpos($h, 'mine') !== false);
+$bySlot = ['Pilote' => $list['signups']];
+$v = render('list', ['list' => $list, 'user' => Auth::user(), 'unlocked' => true, 'bySlot' => $bySlot]);
+check("vue list affiche la bulle de l'inscrit", strpos($v, 'AdminBob') !== false && strpos($v, 'bubble') !== false);
+check("vue list permet le retrait (do=remove)", strpos($v, 'do=remove') !== false || strpos($v, 'value="remove"') !== false);
+
+// Vue home hors connexion : pas de formulaire d'inscription, chips simples
+Session::set('user_id', null);
+$h = render('home', ['lists' => $lists]);
+check("home hors-connexion : chips non cliquables (pas de a=signup)", strpos($h, 'a=signup') === false);
+check("home hors-connexion affiche quand même les inscrits", strpos($h, 'AdminBob') !== false);
 
 // Liste protégée (non déverrouillée)
 $locked = ['id' => Auth::genId(), 'title' => 'Privée', 'slots' => ['Hôte'],
