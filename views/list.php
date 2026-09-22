@@ -34,99 +34,110 @@
     </div>
   <?php endif; ?>
   <div class="card">
-    <table class="list-table">
-      <?php
-      $groups = $list['groups'] ?? [];
-      $ungrouped = [];
-      if (empty($groups)) {
-          $ungrouped = $list['slots'] ?? [];
-      } else {
-          $groupedSlots = [];
-          foreach ($groups as $g) {
-              if (isset($g['title'])) {
-                  foreach ($g['slots'] as $s) $groupedSlots[] = $s;
-              } else {
-                  foreach ($g as $s) $groupedSlots[] = $s;
-              }
-          }
-          foreach (($list['slots'] ?? []) as $s) {
-              if (!in_array($s, $groupedSlots, true)) $ungrouped[] = $s;
-          }
-      }
-      
-      function renderBubbles($slotName, $bySlot, $user) {
-          $people = $bySlot[$slotName] ?? [];
-          if (empty($people)) {
-              return '<span class="bubble empty">—</span>';
-          }
-          $html = '';
-          foreach ($people as $p) {
-              $displayName = htmlspecialchars(App::displayName($p));
-              $color = abs(crc32(App::displayName($p))) % 6;
-              $isMe = ($p['user_id'] ?? '') === ($user['id'] ?? null);
-              $html .= '<span class="bubble p' . $color . ($isMe ? ' me' : '') . '" title="' . $displayName . '">' . $displayName . '</span>';
-          }
-          return $html;
-      }
-      
-      function renderSlotRow($slotName, $list, $bySlot, $user) {
-          $slotNameEsc = htmlspecialchars($slotName);
-          $people = $bySlot[$slotName] ?? [];
-          $myHere = false;
-          foreach ($people as $p) {
-              if (($p['user_id'] ?? '') === ($user['id'] ?? null)) { $myHere = true; break; }
-          }
-          
-          if (Auth::check()):
-              $do = $myHere ? 'remove' : 'add';
-              $title = $myHere ? 'Cliquez pour vous désinscrire' : 'Cliquez pour vous inscrire';
-              $classes = 'slot-cell ' . ($myHere ? 'mine' : '');
-              $html = '<td class="' . $classes . '">' .
-                  '<form method="post" action="index.php?a=signup" class="slot-form-inline">' .
-                  '<input type="hidden" name="id" value="' . htmlspecialchars($list['id']) . '">' .
-                  '<input type="hidden" name="slot" value="' . $slotNameEsc . '">' .
-                  '<input type="hidden" name="do" value="' . $do . '">' .
-                  '<button type="submit" class="slot-link" title="' . htmlspecialchars($title) . '">' . $slotNameEsc . '</button>' .
-                  '</form>' .
-                  '</td>' .
-                  '<td class="people-cell">' . renderBubbles($slotName, $bySlot, $user) . '</td>';
-          else:
-              $html = '<td class="slot-cell">' . $slotNameEsc . '</td>' .
-                     '<td class="people-cell">' . renderBubbles($slotName, $bySlot, $user) . '</td>';
-          endif;
-          return $html;
-      }
-      
-      // Affiche les groupes
-      foreach ($groups as $g):
-          $gTitle = $g['title'] ?? '';
-          $gSlots = $g['slots'] ?? $g;
-      ?>
-        <?php if (!empty($gTitle)): ?>
-          <tr class="chapter-row">
-            <td colspan="2" class="chapter-title"><?= htmlspecialchars($gTitle) ?></td>
-          </tr>
-        <?php endif; ?>
-        <?php foreach ($gSlots as $slotName): ?>
-          <tr class="slot-row">
-            <?= renderSlotRow($slotName, $list, $bySlot, $user) ?>
-          </tr>
-        <?php endforeach; ?>
-      <?php endforeach; ?>
-      
-      <?php if (!empty($ungrouped)): ?>
-        <?php if (!empty($groups)): ?>
-          <tr class="chapter-row">
-            <td colspan="2" class="chapter-title">Autres points</td>
-          </tr>
-        <?php endif; ?>
-        <?php foreach ($ungrouped as $slotName): ?>
-          <tr class="slot-row">
-            <?= renderSlotRow($slotName, $list, $bySlot, $user) ?>
-          </tr>
-        <?php endforeach; ?>
+    <?php
+    $groups = $list['groups'] ?? [];
+    $ungrouped = [];
+    if (empty($groups)) {
+        $ungrouped = $list['slots'] ?? [];
+    } else {
+        $groupedSlots = [];
+        foreach ($groups as $g) {
+            if (isset($g['title'])) {
+                foreach ($g['slots'] as $s) $groupedSlots[] = $s;
+            } else {
+                foreach ($g as $s) $groupedSlots[] = $s;
+            }
+        }
+        foreach (($list['slots'] ?? []) as $s) {
+            if (!in_array($s, $groupedSlots, true)) $ungrouped[] = $s;
+        }
+    }
+    
+    // Helper to get initials
+    function getInitials($text) {
+        $words = explode(' ', $text);
+        $initials = '';
+        foreach ($words as $word) {
+            if (trim($word)) {
+                $initials .= strtoupper(substr(trim($word), 0, 1));
+            }
+        }
+        return substr($initials, 0, 2);
+    }
+    
+    // Helper to render a slot row like the prototype
+    function renderSlotRow($slotName, $list, $bySlot, $user) {
+        $slotNameEsc = htmlspecialchars($slotName);
+        $people = $bySlot[$slotName] ?? [];
+        $count = count($people);
+        $myHere = false;
+        foreach ($people as $p) {
+            if (($p['user_id'] ?? '') === ($user['id'] ?? null)) { $myHere = true; break; }
+        }
+        
+        $initials = getInitials($slotName);
+        
+        // Build attendees HTML
+        $attendeesHtml = '';
+        if (empty($people)) {
+            $attendeesHtml = '<span class="bubble empty">—</span>';
+        } else {
+            foreach ($people as $p) {
+                $displayName = htmlspecialchars(App::displayName($p));
+                $color = abs(crc32(App::displayName($p))) % 6;
+                $isMe = ($p['user_id'] ?? '') === ($user['id'] ?? null);
+                $attendeesHtml .= '<span class="bubble p' . $color . ($isMe ? ' me' : '') . '" title="' . $displayName . '">' . $displayName . '</span>';
+            }
+        }
+        
+        ob_start();
+        ?>
+        <div class="slot-row" role="listitem">
+          <div class="slot-left">
+            <div class="slot-badge"><?= $initials ?></div>
+            <div class="slot-meta">
+              <div class="slot-title"><?= $slotNameEsc ?></div>
+              <div class="slot-sub"><?= $count ?> inscrit<?= $count > 1 ? 's' : '' ?></div>
+            </div>
+          </div>
+          <div class="slot-attendees"><?= $attendeesHtml ?></div>
+          <?php if (Auth::check()): ?>
+            <form method="post" action="index.php?a=signup" class="slot-toggle-form">
+              <input type="hidden" name="id" value="<?= htmlspecialchars($list['id']) ?>">
+              <input type="hidden" name="slot" value="<?= $slotNameEsc ?>">
+              <input type="hidden" name="do" value="<?= $myHere ? 'remove' : 'add' ?>">
+              <button type="submit" class="slot-toggle <?= $myHere ? 'leave' : 'join' ?>" 
+                      title="<?= $myHere ? 'Cliquez pour vous désinscrire' : 'Cliquez pour vous inscrire' ?>">
+                <?= $myHere ? 'Désinscrire' : "S'inscrire" ?>
+              </button>
+            </form>
+          <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    // Display groups
+    foreach ($groups as $g):
+        $gTitle = $g['title'] ?? '';
+        $gSlots = $g['slots'] ?? $g;
+    ?>
+      <?php if (!empty($gTitle)): ?>
+        <h3 class="group-title chapter-title"><?= htmlspecialchars($gTitle) ?></h3>
       <?php endif; ?>
-    </table>
+      <?php foreach ($gSlots as $slotName): ?>
+        <?= renderSlotRow($slotName, $list, $bySlot, $user) ?>
+      <?php endforeach; ?>
+    <?php endforeach; ?>
+    
+    <?php if (!empty($ungrouped)): ?>
+      <?php if (!empty($groups)): ?>
+        <h3 class="group-title chapter-title">Autres points</h3>
+      <?php endif; ?>
+      <?php foreach ($ungrouped as $slotName): ?>
+        <?= renderSlotRow($slotName, $list, $bySlot, $user) ?>
+      <?php endforeach; ?>
+    <?php endif; ?>
   </div>
 <?php endif; ?>
 <?php require __DIR__ . '/_footer.php'; ?>

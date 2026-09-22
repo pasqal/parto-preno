@@ -214,67 +214,102 @@ button.slot-chip:hover, div.slot-chip:hover {
   margin-bottom: 10px;
 }
 
-/* --- Nouveau style tableau pour la liste --- */
-.list-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
+/* --- Nouveau style pour les lignes de slot (comme le prototype) --- */
+.slot-row {
+  background: var(--card);
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  min-height: 56px;
+  user-select: none;
+  margin-bottom: 10px;
 }
-.list-table td {
-  text-align: left;
-  padding: 8px 12px;
-  vertical-align: middle;
-  border: none;
+
+.slot-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
-.list-table .chapter-row td {
-  padding: 12px 12px 8px;
-  border-bottom: 1px solid var(--line);
+
+.slot-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #eef7ff, #f4fbff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 14px;
 }
-.list-table .chapter-title {
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--fg);
-  background: transparent;
+
+.slot-meta {
+  display: flex;
+  flex-direction: column;
 }
-.list-table .slot-row {
-  border-bottom: 1px solid transparent;
-}
-.list-table .slot-row:last-child {
-  border-bottom: none;
-}
-.list-table .slot-row:hover {
-  background: #f8f8f8;
-}
-.list-table .slot-cell {
-  width: 40%;
-  min-width: 150px;
-}
-.list-table .people-cell {
-  width: 60%;
-}
-.list-table .slot-link {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: var(--fg);
-  cursor: pointer;
-  text-align: left;
-  font-weight: 500;
-}
-.list-table .slot-link:hover {
-  text-decoration: underline;
-  filter: none;
-}
-.list-table .slot-cell.mine .slot-link {
+
+.slot-title {
+  font-size: 16px;
   font-weight: 600;
 }
-.slot-form-inline {
+
+.slot-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.slot-attendees {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 50%;
+  justify-content: flex-end;
+}
+
+/* Toggle button styles */
+.slot-toggle-form {
   display: inline;
   margin: 0;
   padding: 0;
 }
-.slot-form-inline input {
+
+.slot-toggle-form input {
   display: none;
+}
+
+.slot-toggle {
+  min-width: 86px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  background: linear-gradient(180deg, #fff, #f7fbff);
+  border: 1px solid rgba(16, 16, 20, 0.06);
+}
+
+.slot-toggle.join {
+  color: var(--accent);
+}
+
+.slot-toggle.leave {
+  color: var(--danger);
+  background: linear-gradient(180deg, #fff5f5, #fff);
+}
+
+/* Chapter titles for group separation */
+.group-title.chapter-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin: 16px 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--line);
 }
