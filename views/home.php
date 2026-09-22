@@ -1,6 +1,6 @@
 <?php require __DIR__ . '/_header.php'; ?>
 
-<h1>Listes d'inscription</h1>
+<h1>Listes à participer</h1>
 <p class="muted">Toutes les listes disponibles. Cliquez sur une liste pour voir ses points d'inscription et vous inscrire.</p>
 
 <?php if (empty($lists)): ?>
@@ -13,7 +13,7 @@
 <?php else: ?>
   <?php if (!Auth::check()): ?>
     <div class="card">
-      <p class="muted">Connectez-vous pour vous inscrire. Vous pouvez consulter les listes et leurs inscrits sans compte.</p>
+      <p class="muted">Connectez-vous pour vous inscrire. Vous pouvez consulter les listes publiques et leurs inscrits sans compte.</p>
       <p>
         <a class="btn" href="index.php?a=login">Connexion</a>
         <a class="btn secondary" href="index.php?a=register">Créer un compte</a>

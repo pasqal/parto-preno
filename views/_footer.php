@@ -1,4 +1,4 @@
 </main>
-<footer class="bottom">Parto preno : cela veut dire je participe en esperanto - inscrivez-vous - participer</footer>
+<footer class="bottom">Partopreno : cela veut dire "participation" en esperanto - ce site permet de recenser les bénévoles pour une activité.</footer>
 </body>
 </html>

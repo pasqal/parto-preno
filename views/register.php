@@ -3,13 +3,13 @@
   <h1>Créer un compte</h1>
   <p class="muted">Compte utilisateur (lecteur) : vous pourrez vous inscrire aux listes avec un pseudo.</p>
   <form method="post" action="index.php?a=register">
-    <label for="login">Identifiant</label>
+    <label for="login">identifiant</label>
     <input type="text" id="login" name="login" required>
 
     <label for="pseudo">Pseudo affiché (optionnel)</label>
     <input type="text" id="pseudo" name="pseudo" placeholder="Pseudo public">
 
-    <label for="password">Mot de passe</label>
+    <label for="password">Mot de passe (si vous perdez, il est perdu pour toujours!!)</label>
     <input type="password" id="password" name="password" required>
 
     <p><button type="submit">Créer le compte</button>
