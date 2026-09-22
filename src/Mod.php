@@ -34,10 +34,13 @@ class Mod
                     'signups'      => [],
                     'created'      => date('c'),
                 ];
+                // Normalisation : si on a des groupes mais pas de slots,
+                // et que les groupes n'ont pas de titres (ancien format),
+                // les convertir en groupes avec titres vides pour compatibilité.
                 if (empty($list['slots']) && !empty($list['groups'])) {
-                    foreach ($list['groups'] as $g) {
-                        foreach ($g['slots'] as $s) {
-                            $list['slots'][] = $s;
+                    foreach ($list['groups'] as $i => $g) {
+                        if (!isset($g['title'])) {
+                            $list['groups'][$i] = ['title' => '', 'slots' => $g];
                         }
                     }
                 }
@@ -71,18 +74,27 @@ class Mod
                 return $s !== '';
             }));
             $description = trim($_POST['description'] ?? '');
+            
+            // Gestion des groupes avec titres
             $groupsIn = $_POST['groups'] ?? [];
+            $groupTitles = $_POST['group_titles'] ?? [];
             $groups = [];
+            
             if (is_array($groupsIn)) {
-                foreach ($groupsIn as $g) {
+                foreach ($groupsIn as $gi => $g) {
                     $g = array_values(array_filter(array_map('trim', is_array($g) ? $g : []), function ($s) {
                         return $s !== '';
                     }));
                     if (!empty($g)) {
-                        $groups[] = $g;
+                        $groupTitle = trim($groupTitles[$gi] ?? '');
+                        $groups[] = [
+                            'title' => $groupTitle,
+                            'slots' => $g
+                        ];
                     }
                 }
             }
+            
             $password = trim($_POST['password'] ?? '');
             $removePassword = !empty($_POST['remove_password']);
             $onePerUser = !empty($_POST['one_per_user']);
@@ -90,15 +102,10 @@ class Mod
             $list['description'] = $description;
             $list['slots'] = $slots;
             $list['groups'] = $groups;
-            if (empty($slots) && !empty($groups)) {
-                $merged = [];
-                foreach ($groups as $g) {
-                    foreach ($g as $s) {
-                        $merged[] = $s;
-                    }
-                }
-                $list['slots'] = $merged;
-            }
+            
+            // Normaliser : si on a des groupes, on les garde. Sinon, on utilise les slots.
+            // Ne plus aplatir automatiquement les groupes en slots.
+            // Si on a à la fois des slots non-groupés et des groupes, on les conserve séparément.
             if ($removePassword) {
                 $list['password'] = '';
             } elseif ($password !== '') {
@@ -106,8 +113,13 @@ class Mod
             }
             $list['one_per_user'] = $onePerUser;
             // Nettoyer les inscriptions dont le slot n'existe plus.
-            $list['signups'] = array_values(array_filter($list['signups'] ?? [], function ($s) use ($list) {
-                return in_array($s['slot'], $list['slots'], true);
+            // Vérifier dans les slots non-groupés ET dans les groupes.
+            $validSlots = $list['slots'] ?? [];
+            foreach ($list['groups'] ?? [] as $g) {
+                $validSlots = array_merge($validSlots, $g['slots'] ?? ($g ?? []));
+            }
+            $list['signups'] = array_values(array_filter($list['signups'] ?? [], function ($s) use ($validSlots) {
+                return in_array($s['slot'], $validSlots, true);
             }));
             Storage::saveList($list);
             Session::flash('ok', 'Liste mise à jour.');

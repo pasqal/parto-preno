@@ -81,19 +81,13 @@ check("Auth::isAdmin true", Auth::isAdmin() === true);
 
 // === Import (logique Mod) ===
 // On appelle la logique interne sans passer par handleImport (redirige).
-// Reproduisons la logique: parse + saveList.
+// Reproduisons la logique: parse + saveList (sans fusionner les groupes).
 $parsed = MarkdownListParser::parse($md);
 foreach ($parsed as $pl) {
-    $slots = $pl['slots'];
-    if (empty($slots) && !empty($pl['groups'])) {
-        foreach ($pl['groups'] as $g) {
-            foreach ($g['slots'] as $s) $slots[] = $s;
-        }
-    }
     Storage::saveList([
         'id' => Auth::genId(), 'title' => $pl['title'],
         'description' => $pl['description'] ?? '', 'groups' => $pl['groups'] ?? [],
-        'slots' => $slots,
+        'slots' => $pl['slots'],
         'password' => '', 'one_per_user' => true, 'owner_id' => $admin['id'],
         'signups' => [], 'created' => date('c'),
     ]);
@@ -110,7 +104,13 @@ check("liste 'Repas' trouvée", $second !== null);
 check("liste1 one_per_user=true", !empty($first['one_per_user']));
 check("liste1 description stockée", $first['description'] === 'La grande sortie annuelle du club.');
 check("liste1 2 groupes stockés", count($first['groups']) === 2);
-check("liste1 slots fusionnés (3)", $first['slots'] === ['Pilote', 'Mécanicien', 'Ravitaillement']);
+check("liste1 groupes préservés avec titres", 
+    $first['groups'][0]['title'] === 'Encadrement' && 
+    $first['groups'][0]['slots'] === ['Pilote', 'Mécanicien'] &&
+    $first['groups'][1]['title'] === 'Logistique' &&
+    $first['groups'][1]['slots'] === ['Ravitaillement']
+);
+check("liste1 slots vides (groupes préservés)", $first['slots'] === []);
 check("liste2 sans groupe, slots plats", $second['groups'] === [] && $second['slots'] === ['Apéritif', 'Plat']);
 
 // === Inscription (logique App::handleSignup sans redirection) ===
@@ -161,36 +161,74 @@ check("retrait inscription", count($l['signups']) === 0);
 function exportCsv($listId) {
     $list = Storage::listById($listId);
     $bySlot = [];
-    foreach ($list['slots'] as $s) $bySlot[$s] = [];
+    // Gérer les slots plats ET les groupes
+    foreach ($list['slots'] ?? [] as $s) $bySlot[$s] = [];
+    foreach ($list['groups'] ?? [] as $g) {
+        foreach ($g['slots'] ?? ($g ?? []) as $s) $bySlot[$s] = [];
+    }
     foreach ($list['signups'] ?? [] as $s) $bySlot[$s['slot']][] = $s;
     $out = "Ligne,Pseudo,Identifiant,Date\n";
-    foreach ($list['slots'] as $s) {
+    foreach ($list['slots'] ?? [] as $s) {
         $people = $bySlot[$s] ?? [];
         if (empty($people)) { $out .= "$s,,,\n"; }
         else foreach ($people as $p) $out .= $s . "," . ($p['pseudo'] ?? '') . "," . ($p['login'] ?? '') . "," . ($p['at'] ?? '') . "\n";
+    }
+    foreach ($list['groups'] ?? [] as $g) {
+        foreach ($g['slots'] ?? ($g ?? []) as $s) {
+            $people = $bySlot[$s] ?? [];
+            if (empty($people)) { $out .= "$s,,,\n"; }
+            else foreach ($people as $p) $out .= $s . "," . ($p['pseudo'] ?? '') . "," . ($p['login'] ?? '') . "," . ($p['at'] ?? '') . "\n";
+        }
     }
     return $out;
 }
 function exportMd($listId) {
     $list = Storage::listById($listId);
     $bySlot = [];
-    foreach ($list['slots'] as $s) $bySlot[$s] = [];
+    // Gérer les slots plats ET les groupes
+    foreach ($list['slots'] ?? [] as $s) $bySlot[$s] = [];
+    foreach ($list['groups'] ?? [] as $g) {
+        foreach ($g['slots'] ?? ($g ?? []) as $s) $bySlot[$s] = [];
+    }
     foreach ($list['signups'] ?? [] as $s) $bySlot[$s['slot']][] = $s;
     $out = "# " . $list['title'] . "\n\n";
-    foreach ($list['slots'] as $s) {
-        $out .= "## " . $s . "\n\n";
+    // Exporter les groupes avec leurs titres
+    foreach ($list['groups'] ?? [] as $g) {
+        $gTitle = $g['title'] ?? '';
+        $gSlots = $g['slots'] ?? ($g ?? []);
+        if (!empty($gTitle)) {
+            $out .= "## " . $gTitle . "\n\n";
+        }
+        foreach ($gSlots as $s) {
+            $out .= "- " . $s;
+            $people = $bySlot[$s] ?? [];
+            if (!empty($people)) {
+                $names = array_map([App::class, 'displayName'], $people);
+                $out .= " — " . implode(', ', $names);
+            }
+            $out .= "\n";
+        }
+        $out .= "\n";
+    }
+    // Exporter les slots non-groupés
+    foreach ($list['slots'] ?? [] as $s) {
+        $out .= "- " . $s;
         $people = $bySlot[$s] ?? [];
-        if (empty($people)) $out .= "_(aucun inscrit)_\n\n";
-        else foreach ($people as $p) { $out .= "- " . App::displayName($p) . "\n"; $out .= "\n"; }
+        if (!empty($people)) {
+            $names = array_map([App::class, 'displayName'], $people);
+            $out .= " — " . implode(', ', $names);
+        }
+        $out .= "\n";
     }
     return $out;
 }
 $csv = exportCsv($first['id']);
 check("export CSV a en-tête", strpos($csv, 'Ligne,Pseudo') !== false);
-check("export CSV a 3 lignes de slots", substr_count($csv, "\n") >= 4);
+check("export CSV a des lignes de slots", substr_count($csv, "\n") >= 4);
 $mdOut = exportMd($first['id']);
 check("export MD a le titre", strpos($mdOut, '# Sortie vélo') !== false);
 check("export MD a 'Pilote'", strpos($mdOut, 'Pilote') !== false);
+check("export MD a 'Encadrement'", strpos($mdOut, 'Encadrement') !== false);
 
 // === Mot de passe de liste ===
 $locked = ['id' => Auth::genId(), 'title' => 'Privée', 'slots' => ['Hôte', 'Invité'],

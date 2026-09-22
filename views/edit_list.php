@@ -12,7 +12,8 @@
       <?php $ungrouped = $list['slots'] ?? [];
       $groupedSlots = [];
       foreach (($list['groups'] ?? []) as $g) {
-          foreach ($g as $s) $groupedSlots[] = $s;
+          $slots = $g['slots'] ?? ($g ?? []);
+          foreach ($slots as $s) $groupedSlots[] = $s;
       }
       foreach ($ungrouped as $i => $slot): if (in_array($slot, $groupedSlots, true)) continue; ?>
         <input type="text" name="slots[]" value="<?= htmlspecialchars($slot) ?>" style="margin-bottom:6px">
@@ -24,7 +25,7 @@
       <?php foreach (($list['groups'] ?? []) as $gi => $g): ?>
         <div class="group-edit" data-group>
           <?php if (!isset($g['title'])): $g = ['title' => '', 'slots' => $g]; endif; ?>
-          <input type="text" class="group-title" placeholder="Titre du groupe" value="<?= htmlspecialchars($g['title']) ?>" style="margin-bottom:6px">
+          <input type="text" class="group-title" name="group_titles[<?= $gi ?>]" placeholder="Titre du groupe" value="<?= htmlspecialchars($g['title']) ?>" style="margin-bottom:6px">
           <?php foreach ($g['slots'] as $s): ?>
             <input type="text" name="groups[<?= $gi ?>][]" value="<?= htmlspecialchars($s) ?>" style="margin-bottom:6px">
           <?php endforeach; ?>
@@ -55,15 +56,18 @@ function addSlot() {
 }
 function addGroup() {
   var d = document.getElementById('groups');
+  var idx = d.children.length;
   var g = document.createElement('div');
   g.className = 'group-edit';
   g.setAttribute('data-group', '');
   var t = document.createElement('input');
-  t.type = 'text'; t.className = 'group-title'; t.placeholder = 'Titre du groupe';
+  t.type = 'text'; t.className = 'group-title'; t.name = 'group_titles[' + idx + ']';
+  t.placeholder = 'Titre du groupe';
   t.style.marginBottom = '6px';
   g.appendChild(t);
   var s = document.createElement('input');
-  s.type = 'text'; s.placeholder = 'Point d\'inscription';
+  s.type = 'text'; s.name = 'groups[' + idx + '][]';
+  s.placeholder = 'Point d\'inscription';
   s.style.marginBottom = '6px';
   g.appendChild(s);
   d.appendChild(g); t.focus();
@@ -71,14 +75,19 @@ function addGroup() {
 document.getElementById('groups').addEventListener('input', function (e) {
   var g = e.target.closest('[data-group]');
   if (!g) return;
+  var idx = Array.prototype.indexOf.call(g.parentNode.children, g);
   if (e.target.classList.contains('group-title')) {
+    e.target.name = 'group_titles[' + idx + ']';
     g.querySelectorAll('input:not(.group-title)').forEach(function (inp) {
-      var idx = Array.prototype.indexOf.call(g.parentNode.children, g);
       inp.name = 'groups[' + idx + '][]';
     });
-  } else if (e.target.name === '' || e.target.name === '[]') {
-    var idx = Array.prototype.indexOf.call(g.parentNode.children, g);
+  } else if (e.target.name === '' || e.target.name === '[]' || !e.target.name.startsWith('groups[')) {
     e.target.name = 'groups[' + idx + '][]';
+  }
+  // Mettre à jour le name du titre aussi
+  var titleInput = g.querySelector('.group-title');
+  if (titleInput) {
+    titleInput.name = 'group_titles[' + idx + ']';
   }
 });
 </script>
