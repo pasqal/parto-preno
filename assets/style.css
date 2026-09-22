@@ -218,11 +218,11 @@ button.slot-chip:hover, div.slot-chip:hover {
 .slots-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .chapter-header {
-  margin: 12px 0 8px;
+  margin: 16px 0 8px;
 }
 
 .chapter-title {
@@ -233,20 +233,22 @@ button.slot-chip:hover, div.slot-chip:hover {
   border-bottom: 2px solid var(--line);
 }
 
-.slots-grid {
+.slot-row {
   display: grid;
   grid-template-columns: 1fr 2fr auto;
-  gap: 8px 12px;
-  align-items: start;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
 }
 
-.slot-column {
-  display: contents;
+.slot-row:last-child {
+  border-bottom: none;
 }
 
 .slot-name-cell {
   font-weight: 500;
-  padding: 8px 0;
+  font-size: 0.95rem;
 }
 
 .slot-count {
@@ -261,10 +263,12 @@ button.slot-chip:hover, div.slot-chip:hover {
   gap: 6px;
   align-items: center;
   justify-content: flex-start;
+  min-width: 0;
 }
 
 .slot-action-cell {
-  padding: 8px 0;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .slot-form-compact {
@@ -278,8 +282,8 @@ button.slot-chip:hover, div.slot-chip:hover {
 }
 
 .btn-compact {
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
   border: 1px solid transparent;
