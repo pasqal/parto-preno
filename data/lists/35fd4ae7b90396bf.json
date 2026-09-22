@@ -1,0 +1,106 @@
+{
+    "id": "35fd4ae7b90396bf",
+    "title": "Cohésion",
+    "description": "Liste exemple pour barbecue lieu - date",
+    "groups": [
+        [
+            "point"
+        ]
+    ],
+    "slots": [
+        "Boisson soft",
+        "Boisson pas soft",
+        "Salade",
+        "Homard thermidor à la truffe",
+        "Tarte salée",
+        "Tarte sucrée",
+        "Dessert",
+        "Je ne sais pas encore ;)",
+        "barbecue",
+        "charbon",
+        "de l'allume feu et un briquet",
+        "une grille spéciale saucisse (ou pas)",
+        "un voire deux gants ignifugés",
+        "une pince, un grattoir, des piques…",
+        "un extincteur",
+        "Saucisses",
+        "Merguez",
+        "Légumes",
+        "Poisson",
+        "Pain",
+        "Autres",
+        "aller-conducteur",
+        "retour-conducteur",
+        "aller-passager",
+        "retour-passage"
+    ],
+    "password": "",
+    "one_per_user": false,
+    "owner_id": "af1f3acf420f138e",
+    "signups": [
+        {
+            "user_id": "af1f3acf420f138e",
+            "login": "admin",
+            "pseudo": "admin",
+            "slot": "Salade",
+            "at": "2026-09-22T21:35:16+02:00"
+        },
+        {
+            "user_id": "af1f3acf420f138e",
+            "login": "admin",
+            "pseudo": "admin",
+            "slot": "Tarte salée",
+            "at": "2026-09-22T21:35:18+02:00"
+        },
+        {
+            "user_id": "af1f3acf420f138e",
+            "login": "admin",
+            "pseudo": "admin",
+            "slot": "Tarte sucrée",
+            "at": "2026-09-22T21:35:19+02:00"
+        },
+        {
+            "user_id": "af1f3acf420f138e",
+            "login": "admin",
+            "pseudo": "admin",
+            "slot": "Dessert",
+            "at": "2026-09-22T21:35:20+02:00"
+        },
+        {
+            "user_id": "af1f3acf420f138e",
+            "login": "admin",
+            "pseudo": "admin",
+            "slot": "une pince, un grattoir, des piques…",
+            "at": "2026-09-22T21:35:55+02:00"
+        },
+        {
+            "user_id": "af1f3acf420f138e",
+            "login": "admin",
+            "pseudo": "admin",
+            "slot": "un voire deux gants ignifugés",
+            "at": "2026-09-22T21:35:57+02:00"
+        },
+        {
+            "user_id": "ecc43fd94473de9f",
+            "login": "alain",
+            "pseudo": "al",
+            "slot": "Homard thermidor à la truffe",
+            "at": "2026-09-22T21:45:15+02:00"
+        },
+        {
+            "user_id": "ecc43fd94473de9f",
+            "login": "alain",
+            "pseudo": "al",
+            "slot": "Tarte salée",
+            "at": "2026-09-22T21:45:18+02:00"
+        },
+        {
+            "user_id": "ecc43fd94473de9f",
+            "login": "alain",
+            "pseudo": "al",
+            "slot": "de l'allume feu et un briquet",
+            "at": "2026-09-22T21:47:41+02:00"
+        }
+    ],
+    "created": "2026-09-22T21:25:30+02:00"
+}

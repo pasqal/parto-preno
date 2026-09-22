@@ -1,0 +1,26 @@
+[
+    {
+        "id": "af1f3acf420f138e",
+        "login": "admin",
+        "password": "$2y$10$Xd0DNUC2PEJwikL9bBp2w.trfMmbE5Yu9Hsqow0t/1njMN7HcG926",
+        "pseudo": "admin",
+        "role": "admin",
+        "created": "2026-09-20T18:45:34+02:00"
+    },
+    {
+        "id": "ecc43fd94473de9f",
+        "login": "alain",
+        "password": "$2y$10$FujEGJHqnrDWTocGyWcMY.qKr1njn/veWeIzo9n06V/LqXmXlZCcC",
+        "pseudo": "al",
+        "role": "user",
+        "created": "2026-09-20T18:47:05+02:00"
+    },
+    {
+        "id": "95e594967b132182",
+        "login": "qsdf",
+        "password": "$2y$10$A.n2/JbxUcieLQ5BW./qheeIWNGRpZfcvXWshnD0rZqZwBIeffTb.",
+        "pseudo": "qsdf",
+        "role": "user",
+        "created": "2026-09-20T18:56:26+02:00"
+    }
+]
