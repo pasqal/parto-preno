@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Parto-preno" fill="currentColor">
+  <!-- Personne 1 -->
+  <circle cx="12" cy="21" r="6"/>
+  <rect x="5" y="31" width="14" height="18" rx="6"/>
+  <rect x="10" y="3" width="4" height="16" rx="2"/>
+  <!-- Personne 2 -->
+  <circle cx="32" cy="21" r="6"/>
+  <rect x="25" y="31" width="14" height="18" rx="6"/>
+  <rect x="30" y="3" width="4" height="16" rx="2"/>
+  <!-- Personne 3 -->
+  <circle cx="52" cy="21" r="6"/>
+  <rect x="45" y="31" width="14" height="18" rx="6"/>
+  <rect x="50" y="3" width="4" height="16" rx="2"/>
+</svg>

@@ -9,10 +9,11 @@ $siteName = $settings['site_name'] ?? 'Parto-preno';
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($siteName) ?></title>
   <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><a href="index.php"><?= htmlspecialchars($siteName) ?></a></div>
+  <div class="brand"><a href="index.php"><img src="assets/logo.svg" alt="" class="brand-logo"><?= htmlspecialchars($siteName) ?></a></div>
   <nav>
     <?php if (Auth::check()): ?>
       <?php if (Auth::isAdmin()): ?>
