@@ -214,102 +214,94 @@ button.slot-chip:hover, div.slot-chip:hover {
   margin-bottom: 10px;
 }
 
-/* --- Nouveau style pour les lignes de slot (comme le prototype) --- */
-.slot-row {
-  background: var(--card);
-  padding: 12px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  box-shadow: var(--shadow);
-  min-height: 56px;
-  user-select: none;
-  margin-bottom: 10px;
-}
-
-.slot-left {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.slot-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #eef7ff, #f4fbff);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 14px;
-}
-
-.slot-meta {
+/* --- Nouveau style en colonnes pour les slots --- */
+.slots-container {
   display: flex;
   flex-direction: column;
+  gap: 16px;
 }
 
-.slot-title {
-  font-size: 16px;
+.chapter-header {
+  margin: 12px 0 8px;
+}
+
+.chapter-title {
+  font-size: 1rem;
   font-weight: 600;
+  color: var(--fg);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--line);
 }
 
-.slot-sub {
-  font-size: 13px;
+.slots-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 8px 12px;
+  align-items: start;
+}
+
+.slot-column {
+  display: contents;
+}
+
+.slot-name-cell {
+  font-weight: 500;
+  padding: 8px 0;
+}
+
+.slot-count {
+  font-size: 0.85rem;
   color: var(--muted);
+  margin-left: 6px;
 }
 
-.slot-attendees {
+.slot-people-cell {
   display: flex;
-  gap: 8px;
-  align-items: center;
   flex-wrap: wrap;
-  max-width: 50%;
-  justify-content: flex-end;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-/* Toggle button styles */
-.slot-toggle-form {
+.slot-action-cell {
+  padding: 8px 0;
+}
+
+.slot-form-compact {
   display: inline;
   margin: 0;
   padding: 0;
 }
 
-.slot-toggle-form input {
+.slot-form-compact input {
   display: none;
 }
 
-.slot-toggle {
-  min-width: 86px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-align: center;
+.btn-compact {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
   font-weight: 600;
-  font-size: 14px;
+  border: 1px solid transparent;
   cursor: pointer;
-  background: linear-gradient(180deg, #fff, #f7fbff);
-  border: 1px solid rgba(16, 16, 20, 0.06);
 }
 
-.slot-toggle.join {
+.btn-join {
+  background: var(--accent-soft);
   color: var(--accent);
 }
 
-.slot-toggle.leave {
-  color: var(--danger);
-  background: linear-gradient(180deg, #fff5f5, #fff);
+.btn-join:hover {
+  background: var(--accent);
+  color: white;
 }
 
-/* Chapter titles for group separation */
-.group-title.chapter-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--fg);
-  margin: 16px 0 8px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid var(--line);
+.btn-remove {
+  background: #fee2e2;
+  color: var(--danger);
+}
+
+.btn-remove:hover {
+  background: var(--danger);
+  color: white;
 }
