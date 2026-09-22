@@ -201,14 +201,43 @@ class App
         header('Content-Disposition: attachment; filename="' . $safeName . '.csv"');
         $out = fopen('php://output', 'w');
         fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8
-        fputcsv($out, ['Ligne', 'Pseudo', 'Identifiant', 'Date']);
+        fputcsv($out, ['Ligne', 'Pseudo', 'Identifiant']);
+        
+        // Exporter avec les groupes comme chapitres
+        $groups = $list['groups'] ?? [];
+        $groupedSlots = [];
+        if (!empty($groups)) {
+            foreach ($groups as $g) {
+                $gTitle = $g['title'] ?? '';
+                $gSlots = $g['slots'] ?? $g;
+                if (!empty($gTitle)) {
+                    // Ligne de chapitre
+                    fputcsv($out, [$gTitle, '', '']);
+                }
+                foreach ($gSlots as $slotName) {
+                    $groupedSlots[] = $slotName;
+                    $people = $bySlot[$slotName] ?? [];
+                    if (empty($people)) {
+                        fputcsv($out, [$slotName, '', '']);
+                    } else {
+                        foreach ($people as $p) {
+                            fputcsv($out, [$slotName, $p['pseudo'] ?? '', $p['login'] ?? '']);
+                        }
+                    }
+                }
+            }
+        }
+        // Slots non groupés
         foreach ($list['slots'] as $slotName) {
+            if (in_array($slotName, $groupedSlots, true)) {
+                continue;
+            }
             $people = $bySlot[$slotName] ?? [];
             if (empty($people)) {
-                fputcsv($out, [$slotName, '', '', '']);
+                fputcsv($out, [$slotName, '', '']);
             } else {
                 foreach ($people as $p) {
-                    fputcsv($out, [$slotName, $p['pseudo'] ?? '', $p['login'] ?? '', $p['at'] ?? '']);
+                    fputcsv($out, [$slotName, $p['pseudo'] ?? '', $p['login'] ?? '']);
                 }
             }
         }
