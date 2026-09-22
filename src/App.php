@@ -84,8 +84,12 @@ class App
         if ($pseudo === '') {
             $pseudo = $user['pseudo'] ?? $user['login'];
         }
-        // Le slot doit exister dans la liste.
-        if (!in_array($slot, $list['slots'] ?? [], true)) {
+        // Le slot doit exister dans la liste (slots non-groupés ou dans les groupes).
+        $validSlots = $list['slots'] ?? [];
+        foreach ($list['groups'] ?? [] as $g) {
+            $validSlots = array_merge($validSlots, $g['slots'] ?? ($g ?? []));
+        }
+        if (!in_array($slot, $validSlots, true)) {
             Session::flash('error', 'Ce point d\'inscription n\'existe pas.');
             Auth::redirect('a=list&id=' . $id);
         }
@@ -146,10 +150,15 @@ class App
             Auth::redirect('a=list&id=' . $id);
         }
         $signups = $list['signups'] ?? [];
-        // Grouper par slot.
+        // Grouper par slot (slots non-groupés + slots des groupes).
         $bySlot = [];
-        foreach ($list['slots'] as $idx => $slotName) {
+        foreach ($list['slots'] ?? [] as $idx => $slotName) {
             $bySlot[$slotName] = [];
+        }
+        foreach ($list['groups'] ?? [] as $g) {
+            foreach ($g['slots'] ?? ($g ?? []) as $slotName) {
+                $bySlot[$slotName] = [];
+            }
         }
         foreach ($signups as $s) {
             $bySlot[$s['slot']][] = $s;
