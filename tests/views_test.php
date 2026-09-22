@@ -55,7 +55,7 @@ $h = render('home', ['lists' => $lists]);
 check("home affiche le tableau des listes", strpos($h, '<table>') !== false);
 check("home avec liste affiche 'Sortie vélo'", strpos($h, 'Sortie vélo') !== false);
 check("home affiche la description", strpos($h, 'La grande sortie annuelle du club.') !== false);
-check("home affiche le nombre de points", strpos($h, 'Points') !== false);
+check("home affiche les inscriptions", strpos($h, 'Inscriptions') !== false);
 check("home a un lien vers la liste (a=list)", strpos($h, 'a=list&') !== false);
 
 $lid = $lists[0]['id'];

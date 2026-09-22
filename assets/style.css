@@ -214,7 +214,6 @@ button.slot-chip:hover, div.slot-chip:hover {
   margin-bottom: 10px;
 }
 
-<<<<<<< HEAD
 /* --- Logo --- */
 .brand-logo {
   width: 22px;
@@ -223,7 +222,8 @@ button.slot-chip:hover, div.slot-chip:hover {
   margin-right: 7px;
   color: var(--accent);
 }
-=======
+
+/* --- Nouveau style en colonnes pour les slots --- */
 /* --- Nouveau style en colonnes pour les slots --- */
 .slots-container {
   display: flex;
@@ -324,4 +324,3 @@ button.slot-chip:hover, div.slot-chip:hover {
   background: var(--danger);
   color: white;
 }
->>>>>>> 368f956c4d16a55af671a912032e34cf255609c9
