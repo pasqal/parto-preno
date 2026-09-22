@@ -213,3 +213,68 @@ button.slot-chip:hover, div.slot-chip:hover {
   padding: 10px;
   margin-bottom: 10px;
 }
+
+/* --- Nouveau style tableau pour la liste --- */
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+.list-table td {
+  text-align: left;
+  padding: 8px 12px;
+  vertical-align: middle;
+  border: none;
+}
+.list-table .chapter-row td {
+  padding: 12px 12px 8px;
+  border-bottom: 1px solid var(--line);
+}
+.list-table .chapter-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--fg);
+  background: transparent;
+}
+.list-table .slot-row {
+  border-bottom: 1px solid transparent;
+}
+.list-table .slot-row:last-child {
+  border-bottom: none;
+}
+.list-table .slot-row:hover {
+  background: #f8f8f8;
+}
+.list-table .slot-cell {
+  width: 40%;
+  min-width: 150px;
+}
+.list-table .people-cell {
+  width: 60%;
+}
+.list-table .slot-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: var(--fg);
+  cursor: pointer;
+  text-align: left;
+  font-weight: 500;
+}
+.list-table .slot-link:hover {
+  text-decoration: underline;
+  filter: none;
+}
+.list-table .slot-cell.mine .slot-link {
+  font-weight: 600;
+}
+.slot-form-inline {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+.slot-form-inline input {
+  display: none;
+}

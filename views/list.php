@@ -34,44 +34,99 @@
     </div>
   <?php endif; ?>
   <div class="card">
-    <?php
-    $groups = $list['groups'] ?? [];
-    $ungrouped = [];
-    if (empty($groups)) {
-        $ungrouped = $list['slots'] ?? [];
-    } else {
-        $groupedSlots = [];
-        foreach ($groups as $g) {
-            if (isset($g['title'])) {
-                foreach ($g['slots'] as $s) $groupedSlots[] = $s;
-            } else {
-                foreach ($g as $s) $groupedSlots[] = $s;
-            }
-        }
-        foreach (($list['slots'] ?? []) as $s) {
-            if (!in_array($s, $groupedSlots, true)) $ungrouped[] = $s;
-        }
-    }
-    ?>
-    <?php foreach ($groups as $g):
-        $gTitle = $g['title'] ?? '';
-        $gSlots = $g['slots'] ?? $g;
-    ?>
-      <h3 class="group-title"><?= htmlspecialchars($gTitle) ?></h3>
-      <div class="slots-row">
+    <table class="list-table">
+      <?php
+      $groups = $list['groups'] ?? [];
+      $ungrouped = [];
+      if (empty($groups)) {
+          $ungrouped = $list['slots'] ?? [];
+      } else {
+          $groupedSlots = [];
+          foreach ($groups as $g) {
+              if (isset($g['title'])) {
+                  foreach ($g['slots'] as $s) $groupedSlots[] = $s;
+              } else {
+                  foreach ($g as $s) $groupedSlots[] = $s;
+              }
+          }
+          foreach (($list['slots'] ?? []) as $s) {
+              if (!in_array($s, $groupedSlots, true)) $ungrouped[] = $s;
+          }
+      }
+      
+      function renderBubbles($slotName, $bySlot, $user) {
+          $people = $bySlot[$slotName] ?? [];
+          if (empty($people)) {
+              return '<span class="bubble empty">—</span>';
+          }
+          $html = '';
+          foreach ($people as $p) {
+              $displayName = htmlspecialchars(App::displayName($p));
+              $color = abs(crc32(App::displayName($p))) % 6;
+              $isMe = ($p['user_id'] ?? '') === ($user['id'] ?? null);
+              $html .= '<span class="bubble p' . $color . ($isMe ? ' me' : '') . '" title="' . $displayName . '">' . $displayName . '</span>';
+          }
+          return $html;
+      }
+      
+      function renderSlotRow($slotName, $list, $bySlot, $user) {
+          $slotNameEsc = htmlspecialchars($slotName);
+          $people = $bySlot[$slotName] ?? [];
+          $myHere = false;
+          foreach ($people as $p) {
+              if (($p['user_id'] ?? '') === ($user['id'] ?? null)) { $myHere = true; break; }
+          }
+          
+          if (Auth::check()):
+              $do = $myHere ? 'remove' : 'add';
+              $title = $myHere ? 'Cliquez pour vous désinscrire' : 'Cliquez pour vous inscrire';
+              $classes = 'slot-cell ' . ($myHere ? 'mine' : '');
+              $html = '<td class="' . $classes . '">' .
+                  '<form method="post" action="index.php?a=signup" class="slot-form-inline">' .
+                  '<input type="hidden" name="id" value="' . htmlspecialchars($list['id']) . '">' .
+                  '<input type="hidden" name="slot" value="' . $slotNameEsc . '">' .
+                  '<input type="hidden" name="do" value="' . $do . '">' .
+                  '<button type="submit" class="slot-link" title="' . htmlspecialchars($title) . '">' . $slotNameEsc . '</button>' .
+                  '</form>' .
+                  '</td>' .
+                  '<td class="people-cell">' . renderBubbles($slotName, $bySlot, $user) . '</td>';
+          else:
+              $html = '<td class="slot-cell">' . $slotNameEsc . '</td>' .
+                     '<td class="people-cell">' . renderBubbles($slotName, $bySlot, $user) . '</td>';
+          endif;
+          return $html;
+      }
+      
+      // Affiche les groupes
+      foreach ($groups as $g):
+          $gTitle = $g['title'] ?? '';
+          $gSlots = $g['slots'] ?? $g;
+      ?>
+        <?php if (!empty($gTitle)): ?>
+          <tr class="chapter-row">
+            <td colspan="2" class="chapter-title"><?= htmlspecialchars($gTitle) ?></td>
+          </tr>
+        <?php endif; ?>
         <?php foreach ($gSlots as $slotName): ?>
-          <?= App::renderSlot($list, $slotName, $bySlot[$slotName] ?? [], $user) ?>
+          <tr class="slot-row">
+            <?= renderSlotRow($slotName, $list, $bySlot, $user) ?>
+          </tr>
         <?php endforeach; ?>
-      </div>
-    <?php endforeach; ?>
-    <?php if (!empty($ungrouped)): ?>
-      <?php if (!empty($groups)): ?><h3 class="group-title">Autres points</h3><?php endif; ?>
-      <div class="slots-row">
+      <?php endforeach; ?>
+      
+      <?php if (!empty($ungrouped)): ?>
+        <?php if (!empty($groups)): ?>
+          <tr class="chapter-row">
+            <td colspan="2" class="chapter-title">Autres points</td>
+          </tr>
+        <?php endif; ?>
         <?php foreach ($ungrouped as $slotName): ?>
-          <?= App::renderSlot($list, $slotName, $bySlot[$slotName] ?? [], $user) ?>
+          <tr class="slot-row">
+            <?= renderSlotRow($slotName, $list, $bySlot, $user) ?>
+          </tr>
         <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
+      <?php endif; ?>
+    </table>
   </div>
 <?php endif; ?>
 <?php require __DIR__ . '/_footer.php'; ?>
