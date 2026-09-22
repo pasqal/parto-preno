@@ -6,12 +6,46 @@ class Mod
     {
         Auth::requireMod();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $text = '';
-            if (!empty($_FILES['file']['tmp_name']) && is_uploaded_file($_FILES['file']['tmp_name'])) {
-                $text = file_get_contents($_FILES['file']['tmp_name']);
-            } else {
-                $text = $_POST['markdown'] ?? '';
+            // Sécurité : vérification du fichier uploadé
+            if (empty($_FILES['file']['tmp_name']) || !is_uploaded_file($_FILES['file']['tmp_name'])) {
+                Session::flash('error', 'Aucun fichier valide fourni.');
+                Auth::redirect('a=import');
             }
+            
+            // Vérification de la taille du fichier (max 100 Ko)
+            if ($_FILES['file']['size'] > 100 * 1024) {
+                Session::flash('error', 'Fichier trop volumineux (max 100 Ko).');
+                Auth::redirect('a=import');
+            }
+            
+            // Vérification de l'extension (par le type MIME pour plus de sécurité)
+            $allowedMimeTypes = ['text/plain', 'text/markdown', 'text/x-markdown'];
+            $detectedMime = mime_content_type($_FILES['file']['tmp_name']);
+            
+            // Fallback : vérification de l'extension si mime_content_type n'est pas fiable
+            $fileExt = strtolower(pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION));
+            $allowedExts = ['md', 'markdown', 'txt', 'text'];
+            
+            if (!in_array($detectedMime, $allowedMimeTypes, true) && !in_array($fileExt, $allowedExts, true)) {
+                Session::flash('error', 'Type de fichier non autorisé. Veuillez fournir un fichier texte ou Markdown.');
+                Auth::redirect('a=import');
+            }
+            
+            // Lecture du contenu du fichier
+            $text = file_get_contents($_FILES['file']['tmp_name']);
+            
+            // Sécurité : vérification que le contenu ne contient pas de balises PHP ou HTML script
+            if (preg_match('/<\?php/i', $text) || preg_match('/<\?/i', $text) || preg_match('/<script/i', $text)) {
+                Session::flash('error', 'Contenu suspect détecté dans le fichier.');
+                Auth::redirect('a=import');
+            }
+            
+            // Sécurité : limiter la taille du contenu (redondant avec la vérification de taille de fichier, mais pour être sûr)
+            if (strlen($text) > 100 * 1024) {
+                Session::flash('error', 'Contenu du fichier trop volumineux.');
+                Auth::redirect('a=import');
+            }
+            
             $parsed = MarkdownListParser::parse($text);
             if (empty($parsed)) {
                 Session::flash('error', 'Aucune liste détectée. Vérifiez le format Markdown (titres # + listes ordonnées).');
