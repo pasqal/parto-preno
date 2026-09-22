@@ -1,0 +1,26 @@
+{
+    "id": "b0102dbd013fe021",
+    "title": "pour la cuisson",
+    "slots": [
+        "barbecue",
+        "charbon",
+        "de l'allume feu et un briquet",
+        "une grille spéciale saucisse (ou pas)",
+        "un voire deux gants ignifugés",
+        "une pince, un grattoir, des piques…",
+        "un extincteur"
+    ],
+    "password": "",
+    "one_per_user": false,
+    "owner_id": "af1f3acf420f138e",
+    "signups": [
+        {
+            "user_id": "ecc43fd94473de9f",
+            "login": "alain",
+            "pseudo": "al",
+            "slot": "une grille spéciale saucisse (ou pas)",
+            "at": "2026-09-20T18:56:00+02:00"
+        }
+    ],
+    "created": "2026-09-20T18:46:27+02:00"
+}

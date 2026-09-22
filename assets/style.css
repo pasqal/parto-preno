@@ -214,6 +214,7 @@ button.slot-chip:hover, div.slot-chip:hover {
   margin-bottom: 10px;
 }
 
+<<<<<<< HEAD
 /* --- Logo --- */
 .brand-logo {
   width: 22px;
@@ -222,3 +223,105 @@ button.slot-chip:hover, div.slot-chip:hover {
   margin-right: 7px;
   color: var(--accent);
 }
+=======
+/* --- Nouveau style en colonnes pour les slots --- */
+.slots-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chapter-header {
+  margin: 16px 0 8px;
+}
+
+.chapter-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--line);
+}
+
+.slot-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.slot-row:last-child {
+  border-bottom: none;
+}
+
+.slot-name-cell {
+  flex: 0 0 20%;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.slot-count {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.slot-people-cell {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.slot-action-cell {
+  flex: 0 0 auto;
+}
+
+.slot-action-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.slot-form-compact {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.slot-form-compact input {
+  display: none;
+}
+
+.btn-compact {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn-join {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.btn-join:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-remove {
+  background: #fee2e2;
+  color: var(--danger);
+}
+
+.btn-remove:hover {
+  background: var(--danger);
+  color: white;
+}
+>>>>>>> 368f956c4d16a55af671a912032e34cf255609c9

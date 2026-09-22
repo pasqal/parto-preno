@@ -1,0 +1,35 @@
+{
+    "id": "8d80b4448b97aba4",
+    "title": "qui amènes :",
+    "slots": [
+        "Boisson soft",
+        "Boisson pas soft",
+        "Salade",
+        "Homard thermidor à la truffe",
+        "Tarte salée",
+        "Tarte sucrée",
+        "Dessert",
+        "Rien (je suis un rat!)",
+        "Je ne sais pas encore ;)"
+    ],
+    "password": "",
+    "one_per_user": false,
+    "owner_id": "af1f3acf420f138e",
+    "signups": [
+        {
+            "user_id": "ecc43fd94473de9f",
+            "login": "alain",
+            "pseudo": "al",
+            "slot": "Homard thermidor à la truffe",
+            "at": "2026-09-20T18:47:59+02:00"
+        },
+        {
+            "user_id": "ecc43fd94473de9f",
+            "login": "alain",
+            "pseudo": "al",
+            "slot": "Tarte salée",
+            "at": "2026-09-20T18:48:02+02:00"
+        }
+    ],
+    "created": "2026-09-20T18:46:27+02:00"
+}

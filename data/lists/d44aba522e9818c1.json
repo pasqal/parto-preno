@@ -1,0 +1,15 @@
+{
+    "id": "d44aba522e9818c1",
+    "title": "Covoit",
+    "slots": [
+        "aller-conducteur",
+        "retour-conducteur",
+        "aller-passager",
+        "retour-passage"
+    ],
+    "password": "",
+    "one_per_user": false,
+    "owner_id": "af1f3acf420f138e",
+    "signups": [],
+    "created": "2026-09-20T18:46:27+02:00"
+}

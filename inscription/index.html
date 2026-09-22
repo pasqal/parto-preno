@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inscription aux lignes</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="app">
+    <div class="header">
+      <label for="name">Votre nom ou pseudo</label>
+      <input id="name" type="text" placeholder="Entrez votre nom..." inputmode="text" />
+
+      <!-- Admin toggle -->
+      <button id="adminToggle" class="muted" aria-pressed="false" title="Mode administrateur">Admin</button>
+    </div>
+
+    <div class="list-wrap" id="listWrap" role="list"></div>
+
+    <!-- Admin panel (hidden by default) -->
+    <section id="adminPanel" class="admin-panel" aria-hidden="true">
+      <div class="admin-controls">
+        <input id="newRowTitle" type="text" placeholder="Titre de la nouvelle ligne" />
+        <button id="addRowBtn">Ajouter la ligne</button>
+        <button id="exportBtn" class="muted">Exporter JSON</button>
+        <button id="importBtn" class="muted">Importer JSON</button>
+        <input id="importArea" type="file" accept="application/json" style="display:none" />
+      </div>
+      <div class="admin-note">En mode administrateur vous pouvez ajouter, modifier ou supprimer des lignes. Les modifications sont sauvegardées localement.</div>
+    </section>
+
+    <footer class="footer">
+      <button id="resetBtn" class="muted">Réinitialiser toutes les inscriptions</button>
+      <div class="note">Les inscriptions sont sauvegardées localement et visibles par les visiteurs de ce navigateur.</div>
+    </footer>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

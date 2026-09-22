@@ -34,44 +34,137 @@
     </div>
   <?php endif; ?>
   <div class="card">
-    <?php
-    $groups = $list['groups'] ?? [];
-    $ungrouped = [];
-    if (empty($groups)) {
-        $ungrouped = $list['slots'] ?? [];
-    } else {
-        $groupedSlots = [];
-        foreach ($groups as $g) {
-            if (isset($g['title'])) {
-                foreach ($g['slots'] as $s) $groupedSlots[] = $s;
-            } else {
-                foreach ($g as $s) $groupedSlots[] = $s;
-            }
-        }
-        foreach (($list['slots'] ?? []) as $s) {
-            if (!in_array($s, $groupedSlots, true)) $ungrouped[] = $s;
-        }
-    }
-    ?>
-    <?php foreach ($groups as $g):
-        $gTitle = $g['title'] ?? '';
-        $gSlots = $g['slots'] ?? $g;
-    ?>
-      <h3 class="group-title"><?= htmlspecialchars($gTitle) ?></h3>
-      <div class="slots-row">
+    <div class="slots-container">
+      <?php
+      $groups = $list['groups'] ?? [];
+      $ungrouped = [];
+      if (empty($groups)) {
+          $ungrouped = $list['slots'] ?? [];
+      } else {
+          $groupedSlots = [];
+          foreach ($groups as $g) {
+              if (isset($g['title'])) {
+                  foreach ($g['slots'] as $s) $groupedSlots[] = $s;
+              } else {
+                  foreach ($g as $s) $groupedSlots[] = $s;
+              }
+          }
+          foreach (($list['slots'] ?? []) as $s) {
+              if (!in_array($s, $groupedSlots, true)) $ungrouped[] = $s;
+          }
+      }
+      
+      // Display groups
+      foreach ($groups as $g):
+          $gTitle = $g['title'] ?? '';
+          $gSlots = $g['slots'] ?? $g;
+      ?>
+        <?php if (!empty($gTitle)): ?>
+          <div class="chapter-header">
+            <h3 class="chapter-title"><?= htmlspecialchars($gTitle) ?></h3>
+          </div>
+        <?php endif; ?>
         <?php foreach ($gSlots as $slotName): ?>
-          <?= App::renderSlot($list, $slotName, $bySlot[$slotName] ?? [], $user) ?>
+          <?php
+          $slotNameEsc = htmlspecialchars($slotName);
+          $people = $bySlot[$slotName] ?? [];
+          $count = count($people);
+          $myHere = false;
+          foreach ($people as $p) {
+              if (($p['user_id'] ?? '') === ($user['id'] ?? null)) { $myHere = true; break; }
+          }
+          
+          // Build attendees HTML
+          $attendeesHtml = '';
+          if (empty($people)) {
+              $attendeesHtml = '<span class="bubble empty">—</span>';
+          } else {
+              foreach ($people as $p) {
+                  $displayName = htmlspecialchars(App::displayName($p));
+                  $color = abs(crc32(App::displayName($p))) % 6;
+                  $isMe = ($p['user_id'] ?? '') === ($user['id'] ?? null);
+                  $attendeesHtml .= '<span class="bubble p' . $color . ($isMe ? ' me' : '') . '" title="' . $displayName . '">' . $displayName . '</span>';
+              }
+          }
+          ?>
+          <div class="slot-row">
+            <div class="slot-name-cell">
+              <?= $slotNameEsc ?>
+              <span class="slot-count">(<?= $count ?>)</span>
+            </div>
+            <div class="slot-people-cell">
+              <?= $attendeesHtml ?>
+            </div>
+            <?php if (Auth::check()): ?>
+              <div class="slot-action-cell">
+                <form method="post" action="index.php?a=signup" class="slot-form-compact">
+                  <input type="hidden" name="id" value="<?= htmlspecialchars($list['id']) ?>">
+                  <input type="hidden" name="slot" value="<?= $slotNameEsc ?>">
+                  <input type="hidden" name="do" value="<?= $myHere ? 'remove' : 'add' ?>">
+                  <button type="submit" class="btn-compact <?= $myHere ? 'btn-remove' : 'btn-join' ?>" 
+                          title="<?= $myHere ? 'Désinscrire' : 'S\'inscrire' ?>">
+                    <?= $myHere ? '×' : '+' ?>
+                  </button>
+                </form>
+              </div>
+            <?php endif; ?>
+          </div>
         <?php endforeach; ?>
-      </div>
-    <?php endforeach; ?>
-    <?php if (!empty($ungrouped)): ?>
-      <?php if (!empty($groups)): ?><h3 class="group-title">Autres points</h3><?php endif; ?>
-      <div class="slots-row">
+      <?php endforeach; ?>
+      
+      <?php if (!empty($ungrouped)): ?>
+        <?php if (!empty($groups)): ?>
+          <div class="chapter-header">
+            <h3 class="chapter-title">Autres points</h3>
+          </div>
+        <?php endif; ?>
         <?php foreach ($ungrouped as $slotName): ?>
-          <?= App::renderSlot($list, $slotName, $bySlot[$slotName] ?? [], $user) ?>
+          <?php
+          $slotNameEsc = htmlspecialchars($slotName);
+          $people = $bySlot[$slotName] ?? [];
+          $count = count($people);
+          $myHere = false;
+          foreach ($people as $p) {
+              if (($p['user_id'] ?? '') === ($user['id'] ?? null)) { $myHere = true; break; }
+          }
+          
+          $attendeesHtml = '';
+          if (empty($people)) {
+              $attendeesHtml = '<span class="bubble empty">—</span>';
+          } else {
+              foreach ($people as $p) {
+                  $displayName = htmlspecialchars(App::displayName($p));
+                  $color = abs(crc32(App::displayName($p))) % 6;
+                  $isMe = ($p['user_id'] ?? '') === ($user['id'] ?? null);
+                  $attendeesHtml .= '<span class="bubble p' . $color . ($isMe ? ' me' : '') . '" title="' . $displayName . '">' . $displayName . '</span>';
+              }
+          }
+          ?>
+          <div class="slot-row">
+            <div class="slot-name-cell">
+              <?= $slotNameEsc ?>
+              <span class="slot-count">(<?= $count ?>)</span>
+            </div>
+            <div class="slot-people-cell">
+              <?= $attendeesHtml ?>
+            </div>
+            <?php if (Auth::check()): ?>
+              <div class="slot-action-cell">
+                <form method="post" action="index.php?a=signup" class="slot-form-compact">
+                  <input type="hidden" name="id" value="<?= htmlspecialchars($list['id']) ?>">
+                  <input type="hidden" name="slot" value="<?= $slotNameEsc ?>">
+                  <input type="hidden" name="do" value="<?= $myHere ? 'remove' : 'add' ?>">
+                  <button type="submit" class="btn-compact <?= $myHere ? 'btn-remove' : 'btn-join' ?>" 
+                          title="<?= $myHere ? 'Désinscrire' : 'S\'inscrire' ?>">
+                    <?= $myHere ? '×' : '+' ?>
+                  </button>
+                </form>
+              </div>
+            <?php endif; ?>
+          </div>
         <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
+      <?php endif; ?>
+    </div>
   </div>
 <?php endif; ?>
 <?php require __DIR__ . '/_footer.php'; ?>

@@ -26,7 +26,6 @@
       <thead>
         <tr>
           <th>Liste</th>
-          <th>Points</th>
           <th>Inscriptions</th>
           <th>Créée le</th>
           <th>Accès</th>
@@ -45,7 +44,6 @@
                 <div class="muted small"><?= htmlspecialchars($l['description']) ?></div>
               <?php endif; ?>
             </td>
-            <td><?= count($l['slots'] ?? []) ?></td>
             <td><?= count($l['signups'] ?? []) ?></td>
             <td><?= date('d/m/Y', strtotime($l['created'] ?? 'now')) ?></td>
             <td>

@@ -128,7 +128,6 @@ class App
         ];
         $list['signups'] = $signups;
         Storage::saveList($list);
-        Session::flash('ok', 'Inscription enregistrée.');
         Auth::redirect('a=list&id=' . $id);
     }
 

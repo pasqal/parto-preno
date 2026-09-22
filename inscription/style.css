@@ -1,0 +1,220 @@
+:root{
+  --bg:#f7f7f6;
+  --card:#ffffff;
+  --accent:#1f8feb;
+  --muted:#6b6b6b;
+  --success:#1fb97f;
+  --danger:#e04b4b;
+  --shadow: 0 6px 18px rgba(20,20,30,0.06);
+  --radius:10px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+}
+
+#app{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:18px;
+  box-sizing:border-box;
+}
+
+/* Header */
+.header{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.header label{
+  font-size:13px;
+  color:var(--muted);
+  min-width:90px;
+}
+#name{
+  flex:1;
+  padding:12px 14px;
+  border-radius:8px;
+  border:1px solid rgba(16,16,20,0.06);
+  background:var(--card);
+  font-size:16px;
+  box-shadow:var(--shadow);
+}
+
+/* List */
+.list-wrap{
+  flex:1;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:6px 2px;
+}
+
+/* Row card */
+.row{
+  background:var(--card);
+  padding:12px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  box-shadow:var(--shadow);
+  min-height:56px;
+  user-select:none;
+  touch-action:manipulation;
+}
+.row .left{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.badge{
+  width:44px;
+  height:44px;
+  border-radius:8px;
+  background:linear-gradient(135deg,#eef7ff,#f4fbff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:var(--accent);
+  font-size:14px;
+}
+.title{
+  font-size:16px;
+  font-weight:600;
+}
+.sub{
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* Attendees */
+.attendees{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  max-width:60%;
+  justify-content:flex-end;
+}
+.att-pill{
+  background:#f2f6f3;
+  padding:6px 8px;
+  border-radius:999px;
+  font-size:13px;
+  color:#244;
+}
+
+/* Buttons & states */
+.row.selected{
+  border:2px solid rgba(31,139,235,0.14);
+  box-shadow:0 8px 26px rgba(31,139,235,0.08);
+}
+.row .toggle{
+  min-width:86px;
+  padding:8px 12px;
+  border-radius:8px;
+  text-align:center;
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+  background:linear-gradient(180deg,#fff,#f7fbff);
+  border:1px solid rgba(16,16,20,0.06);
+}
+.row .toggle.join{
+  color:var(--accent);
+}
+.row .toggle.leave{
+  color:var(--danger);
+  background:linear-gradient(180deg,#fff5f5,#fff);
+}
+
+/* Footer */
+.footer{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+}
+.muted{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid rgba(16,16,20,0.06);
+  background:var(--card);
+  font-size:14px;
+  color:var(--muted);
+}
+
+/* Responsive touch target sizing */
+.row, .toggle, #name, .muted { touch-action:manipulation; }
+@media (max-width:420px){
+  .attendees{max-width:52%;}
+  .badge{width:40px;height:40px;font-size:13px}
+}
+
+/* Admin panel */
+.admin-panel{
+  background:linear-gradient(180deg, #fff, #fbfdff);
+  padding:10px;
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  display:none;
+  gap:8px;
+  align-items:center;
+  justify-content:space-between;
+}
+.admin-panel[aria-hidden="false"]{ display:flex; flex-direction:column; }
+.admin-controls{
+  display:flex;
+  gap:8px;
+  width:100%;
+  align-items:center;
+}
+.admin-controls input[type="text"]{
+  flex:1;
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid rgba(16,16,20,0.06);
+  background:var(--card);
+}
+.admin-controls button{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid rgba(16,16,20,0.06);
+  background:var(--card);
+  cursor:pointer;
+}
+.admin-note{
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* per-row admin actions */
+.row .admin-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.admin-btn{
+  padding:6px 8px;
+  border-radius:8px;
+  border:1px solid rgba(16,16,20,0.06);
+  background:transparent;
+  font-size:13px;
+  cursor:pointer;
+}
+.admin-btn.edit{ color:var(--accent); }
+.admin-btn.delete{ color:var(--danger); }
+
+/* ensure touch targets */
+.admin-controls button, .admin-btn { touch-action:manipulation; }
