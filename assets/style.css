@@ -234,8 +234,7 @@ button.slot-chip:hover, div.slot-chip:hover {
 }
 
 .slot-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr auto;
+  display: flex;
   gap: 12px;
   align-items: center;
   padding: 8px 0;
@@ -247,6 +246,7 @@ button.slot-chip:hover, div.slot-chip:hover {
 }
 
 .slot-name-cell {
+  flex: 0 0 20%;
   font-weight: 500;
   font-size: 0.95rem;
 }
@@ -258,12 +258,17 @@ button.slot-chip:hover, div.slot-chip:hover {
 }
 
 .slot-people-cell {
+  flex: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
   justify-content: flex-start;
   min-width: 0;
+}
+
+.slot-action-cell {
+  flex: 0 0 auto;
 }
 
 .slot-action-cell {
