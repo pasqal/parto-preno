@@ -55,9 +55,13 @@ Description de l'autre liste.
 - `-` : les points auxquels on peut s'inscrire.
 - Les listes ordonnées (`1.` `2.` ...) restent acceptées en compatibilité.
 
+## Accueil : tableau des listes
+
+À son arrivée sur le site, l'utilisateur voit le **tableau des listes disponibles** : titre, description, nombre de points d'inscription, nombre d'inscrits, date de création et accès (publique ou protégée). Un clic sur « Ouvrir » (ou le titre) affiche le détail de la liste.
+
 ## Inscription en un clic
 
-Les listes sont affichées directement sur la page d'accueil : il suffit de cliquer sur un point pour s'inscrire, et re-cliquer pour se désinscrire. Les inscrits apparaissent sous chaque point sous forme de bulles de couleurs (la vôtre est mise en évidence).
+Sur la page d'une liste, il suffit de cliquer sur un point pour s'inscrire, et re-cliquer pour se désinscrire. Les inscrits apparaissent sous chaque point sous forme de bulles de couleurs (la vôtre est mise en évidence).
 
 ## Sécurité
 
