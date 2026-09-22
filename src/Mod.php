@@ -148,12 +148,17 @@ class Mod
             $list['one_per_user'] = $onePerUser;
             // Nettoyer les inscriptions dont le slot n'existe plus.
             // Vérifier dans les slots non-groupés ET dans les groupes.
-            $validSlots = $list['slots'] ?? [];
+            // Les signups utilisent le format "group_title:slot_name" ou "slot_name".
+            $validSlotKeys = $list['slots'] ?? [];
             foreach ($list['groups'] ?? [] as $g) {
-                $validSlots = array_merge($validSlots, $g['slots'] ?? ($g ?? []));
+                $gTitle = $g['title'] ?? '';
+                $gSlots = $g['slots'] ?? ($g ?? []);
+                foreach ($gSlots as $gSlot) {
+                    $validSlotKeys[] = !empty($gTitle) ? $gTitle . ':' . $gSlot : $gSlot;
+                }
             }
-            $list['signups'] = array_values(array_filter($list['signups'] ?? [], function ($s) use ($validSlots) {
-                return in_array($s['slot'], $validSlots, true);
+            $list['signups'] = array_values(array_filter($list['signups'] ?? [], function ($s) use ($validSlotKeys) {
+                return in_array($s['slot'], $validSlotKeys, true);
             }));
             Storage::saveList($list);
             Session::flash('ok', 'Liste mise à jour.');

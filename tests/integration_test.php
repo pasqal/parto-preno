@@ -161,21 +161,28 @@ check("retrait inscription", count($l['signups']) === 0);
 function exportCsv($listId) {
     $list = Storage::listById($listId);
     $bySlot = [];
-    // Gérer les slots plats ET les groupes
+    // Gérer les slots plats ET les groupes avec le format group_title:slot_name
     foreach ($list['slots'] ?? [] as $s) $bySlot[$s] = [];
     foreach ($list['groups'] ?? [] as $g) {
-        foreach ($g['slots'] ?? ($g ?? []) as $s) $bySlot[$s] = [];
+        $gTitle = $g['title'] ?? '';
+        foreach ($g['slots'] ?? ($g ?? []) as $s) {
+            $slotKey = !empty($gTitle) ? $gTitle . ':' . $s : $s;
+            $bySlot[$slotKey] = [];
+        }
     }
     foreach ($list['signups'] ?? [] as $s) $bySlot[$s['slot']][] = $s;
     $out = "Ligne,Pseudo,Identifiant,Date\n";
     foreach ($list['slots'] ?? [] as $s) {
-        $people = $bySlot[$s] ?? [];
+        $slotKey = $s;
+        $people = $bySlot[$slotKey] ?? [];
         if (empty($people)) { $out .= "$s,,,\n"; }
         else foreach ($people as $p) $out .= $s . "," . ($p['pseudo'] ?? '') . "," . ($p['login'] ?? '') . "," . ($p['at'] ?? '') . "\n";
     }
     foreach ($list['groups'] ?? [] as $g) {
+        $gTitle = $g['title'] ?? '';
         foreach ($g['slots'] ?? ($g ?? []) as $s) {
-            $people = $bySlot[$s] ?? [];
+            $slotKey = !empty($gTitle) ? $gTitle . ':' . $s : $s;
+            $people = $bySlot[$slotKey] ?? [];
             if (empty($people)) { $out .= "$s,,,\n"; }
             else foreach ($people as $p) $out .= $s . "," . ($p['pseudo'] ?? '') . "," . ($p['login'] ?? '') . "," . ($p['at'] ?? '') . "\n";
         }
@@ -185,10 +192,14 @@ function exportCsv($listId) {
 function exportMd($listId) {
     $list = Storage::listById($listId);
     $bySlot = [];
-    // Gérer les slots plats ET les groupes
+    // Gérer les slots plats ET les groupes avec le format group_title:slot_name
     foreach ($list['slots'] ?? [] as $s) $bySlot[$s] = [];
     foreach ($list['groups'] ?? [] as $g) {
-        foreach ($g['slots'] ?? ($g ?? []) as $s) $bySlot[$s] = [];
+        $gTitle = $g['title'] ?? '';
+        foreach ($g['slots'] ?? ($g ?? []) as $s) {
+            $slotKey = !empty($gTitle) ? $gTitle . ':' . $s : $s;
+            $bySlot[$slotKey] = [];
+        }
     }
     foreach ($list['signups'] ?? [] as $s) $bySlot[$s['slot']][] = $s;
     $out = "# " . $list['title'] . "\n\n";
@@ -200,8 +211,9 @@ function exportMd($listId) {
             $out .= "## " . $gTitle . "\n\n";
         }
         foreach ($gSlots as $s) {
+            $slotKey = !empty($gTitle) ? $gTitle . ':' . $s : $s;
             $out .= "- " . $s;
-            $people = $bySlot[$s] ?? [];
+            $people = $bySlot[$slotKey] ?? [];
             if (!empty($people)) {
                 $names = array_map([App::class, 'displayName'], $people);
                 $out .= " — " . implode(', ', $names);
@@ -212,8 +224,9 @@ function exportMd($listId) {
     }
     // Exporter les slots non-groupés
     foreach ($list['slots'] ?? [] as $s) {
+        $slotKey = $s;
         $out .= "- " . $s;
-        $people = $bySlot[$s] ?? [];
+        $people = $bySlot[$slotKey] ?? [];
         if (!empty($people)) {
             $names = array_map([App::class, 'displayName'], $people);
             $out .= " — " . implode(', ', $names);

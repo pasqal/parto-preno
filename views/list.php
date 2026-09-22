@@ -67,7 +67,11 @@
         <?php foreach ($gSlots as $slotName): ?>
           <?php
           $slotNameEsc = htmlspecialchars($slotName);
-          $people = $bySlot[$slotName] ?? [];
+          // Pour les slots groupés, utiliser group_title:slot_name comme clé unique
+          $slotKey = !empty($gTitle) ? $gTitle . ':' . $slotName : $slotName;
+          $slotKeyEsc = htmlspecialchars($slotKey);
+          
+          $people = $bySlot[$slotKey] ?? [];
           $count = count($people);
           $myHere = false;
           foreach ($people as $p) {
@@ -99,7 +103,7 @@
               <div class="slot-action-cell">
                 <form method="post" action="index.php?a=signup" class="slot-form-compact">
                   <input type="hidden" name="id" value="<?= htmlspecialchars($list['id']) ?>">
-                  <input type="hidden" name="slot" value="<?= $slotNameEsc ?>">
+                  <input type="hidden" name="slot" value="<?= $slotKeyEsc ?>">
                   <input type="hidden" name="do" value="<?= $myHere ? 'remove' : 'add' ?>">
                   <button type="submit" class="btn-compact <?= $myHere ? 'btn-remove' : 'btn-join' ?>" 
                           title="<?= $myHere ? 'Désinscrire' : 'S\'inscrire' ?>">
@@ -121,7 +125,11 @@
         <?php foreach ($ungrouped as $slotName): ?>
           <?php
           $slotNameEsc = htmlspecialchars($slotName);
-          $people = $bySlot[$slotName] ?? [];
+          // Pour les slots non-groupés, la clé est juste le nom du slot
+          $slotKey = $slotName;
+          $slotKeyEsc = htmlspecialchars($slotKey);
+          
+          $people = $bySlot[$slotKey] ?? [];
           $count = count($people);
           $myHere = false;
           foreach ($people as $p) {
@@ -152,7 +160,7 @@
               <div class="slot-action-cell">
                 <form method="post" action="index.php?a=signup" class="slot-form-compact">
                   <input type="hidden" name="id" value="<?= htmlspecialchars($list['id']) ?>">
-                  <input type="hidden" name="slot" value="<?= $slotNameEsc ?>">
+                  <input type="hidden" name="slot" value="<?= $slotKeyEsc ?>">
                   <input type="hidden" name="do" value="<?= $myHere ? 'remove' : 'add' ?>">
                   <button type="submit" class="btn-compact <?= $myHere ? 'btn-remove' : 'btn-join' ?>" 
                           title="<?= $myHere ? 'Désinscrire' : 'S\'inscrire' ?>">

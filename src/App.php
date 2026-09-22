@@ -46,9 +46,41 @@ class App
 
         // Préparer les inscriptions par slot.
         $signups = $list['signups'] ?? [];
-        // Construire un index slot -> [pseudo|login, user_id]
-        $bySlot = [];
+        
+        // Migration automatique des anciennes inscriptions : convertir "slot_name" en "group_title:slot_name"
+        // pour une meilleure compatibilité avec les groupes
+        $migratedSignups = [];
         foreach ($signups as $s) {
+            $slot = $s['slot'];
+            $migratedSlot = $slot;
+            
+            // Si le slot ne contient pas de ":", c'est une ancienne inscription au format simple
+            if (strpos($slot, ':') === false) {
+                // Chercher dans quel(s) groupe(s) ce slot existe
+                $foundGroups = [];
+                foreach ($list['groups'] ?? [] as $g) {
+                    $gTitle = $g['title'] ?? '';
+                    $gSlots = $g['slots'] ?? ($g ?? []);
+                    if (in_array($slot, $gSlots, true) && !empty($gTitle)) {
+                        $foundGroups[] = $gTitle;
+                    }
+                }
+                
+                // Si le slot est trouvé dans exactement un groupe, on migre
+                if (count($foundGroups) === 1) {
+                    $migratedSlot = $foundGroups[0] . ':' . $slot;
+                }
+                // Si le slot est dans plusieurs groupes, on ne peut pas migrer automatiquement,
+                // donc on garde l'ancien format et il sera affiché dans tous les groupes correspondants
+            }
+            
+            $s['slot'] = $migratedSlot;
+            $migratedSignups[] = $s;
+        }
+        
+        // Construire un index slot_key -> [signups]
+        $bySlot = [];
+        foreach ($migratedSignups as $s) {
             $bySlot[$s['slot']][] = $s;
         }
 
@@ -84,12 +116,31 @@ class App
         if ($pseudo === '') {
             $pseudo = $user['pseudo'] ?? $user['login'];
         }
-        // Le slot doit exister dans la liste (slots non-groupés ou dans les groupes).
-        $validSlots = $list['slots'] ?? [];
-        foreach ($list['groups'] ?? [] as $g) {
-            $validSlots = array_merge($validSlots, $g['slots'] ?? ($g ?? []));
+        // Le slot doit exister dans la liste.
+        // Format: "group_title:slot_name" pour les groupés, "slot_name" pour les non-groupés.
+        $slotExists = false;
+        
+        // Vérifier d'abord dans les slots non-groupés
+        if (in_array($slot, $list['slots'] ?? [], true)) {
+            $slotExists = true;
         }
-        if (!in_array($slot, $validSlots, true)) {
+        
+        // Vérifier dans les groupes
+        if (!$slotExists) {
+            foreach ($list['groups'] ?? [] as $g) {
+                $gTitle = $g['title'] ?? '';
+                $gSlots = $g['slots'] ?? ($g ?? []);
+                foreach ($gSlots as $gSlot) {
+                    $groupSlotKey = !empty($gTitle) ? $gTitle . ':' . $gSlot : $gSlot;
+                    if ($slot === $groupSlotKey) {
+                        $slotExists = true;
+                        break 2;
+                    }
+                }
+            }
+        }
+        
+        if (!$slotExists) {
             Session::flash('error', 'Ce point d\'inscription n\'existe pas.');
             Auth::redirect('a=list&id=' . $id);
         }
@@ -150,14 +201,17 @@ class App
             Auth::redirect('a=list&id=' . $id);
         }
         $signups = $list['signups'] ?? [];
-        // Grouper par slot (slots non-groupés + slots des groupes).
+        // Grouper par slot_key (slots non-groupés + slots des groupes).
+        // slot_key = "group_title:slot_name" pour les groupés, "slot_name" pour les non-groupés.
         $bySlot = [];
         foreach ($list['slots'] ?? [] as $idx => $slotName) {
             $bySlot[$slotName] = [];
         }
         foreach ($list['groups'] ?? [] as $g) {
+            $gTitle = $g['title'] ?? '';
             foreach ($g['slots'] ?? ($g ?? []) as $slotName) {
-                $bySlot[$slotName] = [];
+                $slotKey = !empty($gTitle) ? $gTitle . ':' . $slotName : $slotName;
+                $bySlot[$slotKey] = [];
             }
         }
         foreach ($signups as $s) {
@@ -173,14 +227,16 @@ class App
                 echo $list['description'] . "\n\n";
             }
             $groups = $list['groups'] ?? [];
-            $groupedSlots = [];
+            $groupedSlotKeys = [];
             foreach ($groups as $g) {
+                $gTitle = $g['title'] ?? '';
                 $gSlots = $g['slots'] ?? $g;
-                echo "## " . ($g['title'] ?? '') . "\n\n";
+                echo "## " . ($gTitle ?? '') . "\n\n";
                 foreach ($gSlots as $slotName) {
-                    $groupedSlots[] = $slotName;
+                    $slotKey = !empty($gTitle) ? $gTitle . ':' . $slotName : $slotName;
+                    $groupedSlotKeys[] = $slotKey;
                     echo "- " . $slotName;
-                    $people = $bySlot[$slotName] ?? [];
+                    $people = $bySlot[$slotKey] ?? [];
                     if (!empty($people)) {
                         $names = array_map([get_class(), 'displayName'], $people);
                         echo " — " . implode(', ', $names);
@@ -190,11 +246,12 @@ class App
                 echo "\n";
             }
             foreach ($list['slots'] as $slotName) {
-                if (in_array($slotName, $groupedSlots, true)) {
+                $slotKey = $slotName; // Les slots non-groupés gardent leur nom comme clé
+                if (in_array($slotKey, $groupedSlotKeys, true)) {
                     continue;
                 }
                 echo "- " . $slotName;
-                $people = $bySlot[$slotName] ?? [];
+                $people = $bySlot[$slotKey] ?? [];
                 if (!empty($people)) {
                     $names = array_map([get_class(), 'displayName'], $people);
                     echo " — " . implode(', ', $names);
@@ -214,7 +271,7 @@ class App
         
         // Exporter avec les groupes comme chapitres
         $groups = $list['groups'] ?? [];
-        $groupedSlots = [];
+        $groupedSlotKeys = [];
         if (!empty($groups)) {
             foreach ($groups as $g) {
                 $gTitle = $g['title'] ?? '';
@@ -224,8 +281,9 @@ class App
                     fputcsv($out, [$gTitle, '', '']);
                 }
                 foreach ($gSlots as $slotName) {
-                    $groupedSlots[] = $slotName;
-                    $people = $bySlot[$slotName] ?? [];
+                    $slotKey = !empty($gTitle) ? $gTitle . ':' . $slotName : $slotName;
+                    $groupedSlotKeys[] = $slotKey;
+                    $people = $bySlot[$slotKey] ?? [];
                     if (empty($people)) {
                         fputcsv($out, [$slotName, '', '']);
                     } else {
@@ -238,10 +296,11 @@ class App
         }
         // Slots non groupés
         foreach ($list['slots'] as $slotName) {
-            if (in_array($slotName, $groupedSlots, true)) {
+            $slotKey = $slotName;
+            if (in_array($slotKey, $groupedSlotKeys, true)) {
                 continue;
             }
-            $people = $bySlot[$slotName] ?? [];
+            $people = $bySlot[$slotKey] ?? [];
             if (empty($people)) {
                 fputcsv($out, [$slotName, '', '']);
             } else {
