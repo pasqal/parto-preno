@@ -53,6 +53,8 @@ class Mod
             }
             $password = trim($_POST['password'] ?? '');
             $onePerUser = !empty($_POST['one_per_user']);
+            $openFrom = trim($_POST['open_from'] ?? '');
+            $openUntil = trim($_POST['open_until'] ?? '');
             $count = 0;
             foreach ($parsed as $parsed_list) {
                 $id = Auth::genId();
@@ -64,7 +66,9 @@ class Mod
                     'slots'        => $parsed_list['slots'],
                     'password'     => $password !== '' ? password_hash($password, PASSWORD_DEFAULT) : '',
                     'one_per_user' => $onePerUser,
-                    'owner_id'     => Auth::user()['id'],
+                    'open_from'   => $openFrom,
+                    'open_until'  => $openUntil,
+                    'owner_id'    => Auth::user()['id'],
                     'signups'      => [],
                     'created'      => date('c'),
                 ];
@@ -132,6 +136,8 @@ class Mod
             $password = trim($_POST['password'] ?? '');
             $removePassword = !empty($_POST['remove_password']);
             $onePerUser = !empty($_POST['one_per_user']);
+            $openFrom = trim($_POST['open_from'] ?? '');
+            $openUntil = trim($_POST['open_until'] ?? '');
             $list['title'] = $title !== '' ? $title : $list['title'];
             $list['description'] = $description;
             $list['slots'] = $slots;
@@ -146,6 +152,8 @@ class Mod
                 $list['password'] = password_hash($password, PASSWORD_DEFAULT);
             }
             $list['one_per_user'] = $onePerUser;
+            $list['open_from'] = $openFrom;
+            $list['open_until'] = $openUntil;
             // Nettoyer les inscriptions dont le slot n'existe plus.
             // Vérifier dans les slots non-groupés ET dans les groupes.
             // Les signups utilisent le format "group_title:slot_name" ou "slot_name".

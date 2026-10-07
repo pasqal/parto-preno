@@ -2,6 +2,21 @@
 // App : partie publique / utilisateur (lecteur).
 class App
 {
+    // Une liste est modifiable (inscriptions) uniquement entre open_from et open_until (dates Y-m-d, incluses, optionnelles).
+    public static function isOpen($list)
+    {
+        $today = date('Y-m-d');
+        $from = trim($list['open_from'] ?? '');
+        $until = trim($list['open_until'] ?? '');
+        if ($from !== '' && $today < $from) {
+            return false;
+        }
+        if ($until !== '' && $today > $until) {
+            return false;
+        }
+        return true;
+    }
+
     public static function home()
     {
         $lists = Storage::listAll();
@@ -100,6 +115,11 @@ class App
         if (!$list) {
             Session::flash('error', 'Liste introuvable.');
             Auth::redirect('');
+        }
+        // Hors des dates d'ouverture : la liste est en lecture seule.
+        if (!Auth::isAdmin() && !self::isOpen($list)) {
+            Session::flash('error', 'Cette liste est en lecture seule (hors de ses dates d\'ouverture).');
+            Auth::redirect('a=list&id=' . $id);
         }
         // Vérifier verrouillage mot de passe.
         if (!empty($list['password']) && !Session::get('list_unlock_' . $id)) {

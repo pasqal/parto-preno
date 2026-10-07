@@ -6,6 +6,11 @@
 <div class="list-meta">
   <?php if (!empty($list['password'])): ?> <span class="tag lock">protégée</span> · <?php endif; ?>
   <?= count($list['slots'] ?? []) ?> point(s) · <?= count($list['signups'] ?? []) ?> inscription(s)
+  <?php $open = App::isOpen($list); $from = trim($list['open_from'] ?? ''); $until = trim($list['open_until'] ?? ''); ?>
+  <?php if ($from !== '' || $until !== ''): ?>
+    · inscriptions <?= $from !== '' ? 'du ' . htmlspecialchars($from) : '' ?><?= $until !== '' ? ($from !== '' ? ' ' : '') . 'au ' . htmlspecialchars($until) : '' ?>
+    <?php if (!$open): ?> · <span class="tag lock">fermée (lecture seule)</span><?php endif; ?>
+  <?php endif; ?>
 </div>
 <?php if (Auth::isMod()): ?>
   <p class="small">
@@ -31,6 +36,10 @@
     <div class="card">
       <p class="muted">Connectez-vous pour vous inscrire. Vous pouvez toujours consulter les inscrits ci-dessous.</p>
       <p><a class="btn" href="index.php?a=login">Connexion</a></p>
+    </div>
+  <?php elseif (!$open): ?>
+    <div class="card">
+      <p class="muted">Les inscriptions sont fermées pour cette liste : elle est en lecture seule.</p>
     </div>
   <?php endif; ?>
   <div class="card">
@@ -99,7 +108,7 @@
             <div class="slot-people-cell">
               <?= $attendeesHtml ?>
             </div>
-            <?php if (Auth::check()): ?>
+            <?php if (Auth::check() && $open): ?>
               <div class="slot-action-cell">
                 <form method="post" action="index.php?a=signup" class="slot-form-compact">
                   <input type="hidden" name="id" value="<?= htmlspecialchars($list['id']) ?>">
@@ -156,7 +165,7 @@
             <div class="slot-people-cell">
               <?= $attendeesHtml ?>
             </div>
-            <?php if (Auth::check()): ?>
+            <?php if (Auth::check() && $open): ?>
               <div class="slot-action-cell">
                 <form method="post" action="index.php?a=signup" class="slot-form-compact">
                   <input type="hidden" name="id" value="<?= htmlspecialchars($list['id']) ?>">

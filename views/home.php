@@ -52,6 +52,9 @@
               <?php else: ?>
                 <span class="tag">publique</span>
               <?php endif; ?>
+              <?php if (!App::isOpen($l)): ?>
+                <span class="tag lock">fermée</span>
+              <?php endif; ?>
             </td>
             <td>
               <a class="btn secondary" href="index.php?a=list&id=<?= urlencode($l['id']) ?>">Ouvrir</a>

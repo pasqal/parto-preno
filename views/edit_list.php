@@ -37,6 +37,10 @@
     <input type="password" id="password" name="password">
     <label><input type="checkbox" name="remove_password" value="1"> Retirer la protection</label>
     <label><input type="checkbox" name="one_per_user" value="1" <?= !empty($list['one_per_user']) ? 'checked' : '' ?>> Une seule inscription par personne par liste</label>
+    <label for="open_from">Ouverture des inscriptions (laisser vide = dès maintenant)</label>
+    <input type="date" id="open_from" name="open_from" value="<?= htmlspecialchars($list['open_from'] ?? '') ?>">
+    <label for="open_until">Fermeture des inscriptions (laisser vide = sans limite)</label>
+    <input type="date" id="open_until" name="open_until" value="<?= htmlspecialchars($list['open_until'] ?? '') ?>">
     <p>
       <button type="submit">Enregistrer</button>
       <a class="btn secondary" href="index.php?a=list&id=<?= urlencode($list['id']) ?>">Annuler</a>
